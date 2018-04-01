@@ -15,6 +15,7 @@ from common import load_images
     SETTINGS (can be configured with environment variables)
 '''
 MAX_ITERATIONS = int(os.environ.get('MAX_ITERATIONS', 1000))
+BATCH_SIZE = int(os.environ.get('BATCH_SIZE', 100))
 KFOLD_SPLITS = int(os.environ.get('KFOLD_SPLITS', 5))
 KFOLD_RANDOM_STATE = int(os.environ.get('KFOLD_RANDOM_STATE', 666))
 TFHUB_INCEPTION_V3_MODULE_SPEC_URL = os.environ.get('TFHUB_INCEPTION_V3_MODULE_SPEC_URL', 
@@ -35,9 +36,13 @@ def extract_inception_bottleneck_feature_vectors(images):
     images = [tf.image.resize_images(x, (image_height, image_width)) for x in images]
     sess = tf.Session()
     m = hub.Module(module_spec)
-    bottleneck_tensors = m(images)
+    X = []
     sess.run(tf.global_variables_initializer())
-    X = sess.run(bottleneck_tensors)
+    batches = [images[i:i + BATCH_SIZE] for i in range(0, len(images), BATCH_SIZE)]
+    for batch in batches:
+        bottleneck_tensors = m(batch)
+        x_batch = sess.run(bottleneck_tensors)
+        X.extend(x_batch)
     return X
 
 def train_and_test_svm(X, y):
@@ -59,12 +64,10 @@ def train_and_test_svm(X, y):
         print('Training model for fold ' + str(i) + '...')
         model = svm.SVC(max_iter=MAX_ITERATIONS)
         model.fit(X_train, y_train)
-        print('\n')
         print('Testing model for fold ' + str(i) + '...')
         y_test_predict = np.array(model.predict(X_test))
         accuracy = np.sum(y_test_predict == y_test) / y_test.size
         confusion_matrix = metrics.confusion_matrix(y_test_predict, y_test)
-        print('\n')
         print('Accuracy: ' + str(accuracy))
         print('Confusion matrix:')
         print(confusion_matrix)

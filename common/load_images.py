@@ -30,10 +30,10 @@ CLASSES = [
         'name': 'plastic',
         'image_dir_path': DATASET_PATH + '/plastic'
     },
-    {
-        'name': 'trash',
-        'image_dir_path': DATASET_PATH + '/trash'
-    }
+    # {
+    #     'name': 'trash',
+    #     'image_dir_path': DATASET_PATH + '/trash'
+    # }
 ]
 
 '''
