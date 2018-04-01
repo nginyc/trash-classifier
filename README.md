@@ -21,10 +21,14 @@ cat requirements.txt
 git push
 ```
 
-## Running SVM Classifier
+## Running SVM Classifiers
 
 ```bash
-python3 ./svm/svm_classifier.py
+python3 . svm_inception_bottleneck
+```
+
+```bash
+python3 . svm_raw_pixels
 ```
 
 ## Running CNN Classifier
