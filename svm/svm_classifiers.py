@@ -90,6 +90,15 @@ def train_svm_raw_pixels():
     train_and_test_svm(X, y)
 
 def train_svm_inception_bottleneck():
+    # Potential upgrades
+    # TODO: distortions, cropping, brightening the images to generate more data: \
+    #   https://www.tensorflow.org/tutorials/image_retraining#bottlenecks
+    # TODO: Try another SVM kernel e.g. RBF or other SVM settings: \ 
+    #   https://code.oursky.com/tensorflow-svm-image-classifications-engine/
+    # TODO: Find more training data?
+    # TODO: Find more material types?
+    # TODO: Explore misclassifications and in-depth about how bottleneck features work \
+    #   (and whether other features might be better in other ways?)
     (images, image_labels) = load_images()
     X = extract_inception_bottleneck_feature_vectors(images)
     y = image_labels
