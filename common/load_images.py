@@ -5,7 +5,7 @@ import os
 '''
     SETTINGS (can be configured with environment variables)
 '''
-IMAGE_COUNT_PER_CLASS = int(os.environ.get('IMAGE_COUNT_PER_CLASS', None))
+IMAGE_COUNT_PER_CLASS = int(os.environ.get('IMAGE_COUNT_PER_CLASS', 0))
 DATASET_PATH = os.environ.get('DATASET_PATH', 
     os.path.dirname(__file__) + '/../data/garythung-trashnet')
 
