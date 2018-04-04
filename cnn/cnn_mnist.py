@@ -2,10 +2,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from common import load_images
-
 import numpy as np
 import tensorflow as tf
+import os
+
+import tf_file_reader
+
+# from common import load_images
 
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
@@ -73,7 +76,8 @@ def cnn_model_fn(features, labels, mode):
 def main(argv):
   # Load training and eval data
   # mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-  (train_data, train_labels) = load_images()
+  (train_data, train_labels) = tf_file_reader.run()
+  (eval_data, eval_labels) = (train_data, train_labels)
   # train_data = mnist.train.images # Returns np.array TODO:
   # train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
   # eval_data = mnist.test.images # Returns np.array TODO:
@@ -97,17 +101,17 @@ def main(argv):
       shuffle=True)
   mnist_classifier.train(
       input_fn=train_input_fn,
-      steps=20000,
+      steps=200,
       hooks=[logging_hook])
 
   # Evaluate the model and print results
-  # eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-  #     x={"x": eval_data},
-  #     y=eval_labels,
-  #     num_epochs=1,
-  #     shuffle=False)
-  # eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
-  # print(eval_results)
+  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
+      x={"x": eval_data},
+      y=eval_labels,
+      num_epochs=1,
+      shuffle=False)
+  eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
+  print(eval_results)
 
 if __name__ == "__main__":
   tf.app.run()
