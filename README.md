@@ -51,7 +51,7 @@ out_width  = ceil(float(in_width - filter_width + 1) / float(strides[2]))
 
 1. Input Layer (MNIST data)
 
-    Output Shape: `[-1, 256, 256, 1]`
+    Output Shape: `[-1, 256, 256, 3]`
 
 2. Convolution Layer 1
 
