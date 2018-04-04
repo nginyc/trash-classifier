@@ -65,7 +65,7 @@ def split(images, labels, ratio):
 
 
 def convert_to_tfrecord(images, labels, save_dir, name):
-    filename = os.path.join(save_dir, name + '.tfrecords')
+    filename = os.path.join(save_dir, name)
 
     writer = tf.python_io.TFRecordWriter(filename)
     print('\nTransform start......')
@@ -75,8 +75,8 @@ def convert_to_tfrecord(images, labels, save_dir, name):
             image_raw = image.tostring()
             label = int(labels[i])
             example = tf.train.Example(features=tf.train.Features(feature={
-                'label':int64_feature(label),
-                'image_raw': bytes_feature(image_raw)
+                'label': int64_feature(label),
+                'image_data': bytes_feature(image_raw)
             }))
             writer.write(example.SerializeToString())
         except IOError as e:

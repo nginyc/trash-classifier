@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-def alexnet_layers_fn(input_layer):
+def alexnet_layers_fn(input_layer, mode):
 
     # Convolution Layer 1
     conv1 = tf.layers.conv2d(
