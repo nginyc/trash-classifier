@@ -9,4 +9,4 @@ def main(argv):
   print("Running cnn.")
 
 if __name__ == "__main__":
-  tf.app.run()
+  tf.app.run()l
