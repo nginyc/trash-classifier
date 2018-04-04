@@ -3,8 +3,12 @@ import numpy as np
 import os
 import skimage.io as io
 
-IMAGE_DIRECTORY = "../data/garythung-trashnet"
-TFRECORD_DIRECTORY = "../data/tfrecords"
+CNN_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+IMAGE_DIRECTORY = os.path.join(CNN_DIRECTORY, "..", "data", "garythung-trashnet")
+TFRECORD_DIRECTORY = os.path.join(CNN_DIRECTORY, "..", "data", "tfrecords")
+
+TRAIN_FILENAME = "train.tfrecords"
+TEST_FILENAME = "test.tfrecords"
 
 CATEGORIES = {
     'cardboard': 1,
@@ -85,8 +89,8 @@ def convert_to_tfrecord(images, labels, save_dir, name):
 def main(argv):
     images, labels = get_images_and_labels(IMAGE_DIRECTORY, CATEGORIES)
     train_images, train_labels, test_images, test_labels = split(images, labels, 0.7)
-    convert_to_tfrecord(train_images, train_labels, TFRECORD_DIRECTORY, "train")
-    convert_to_tfrecord(test_images, test_labels, TFRECORD_DIRECTORY, "test")
+    convert_to_tfrecord(train_images, train_labels, TFRECORD_DIRECTORY, TRAIN_FILENAME)
+    convert_to_tfrecord(test_images, test_labels, TFRECORD_DIRECTORY, TEST_FILENAME)
 
 if __name__ == "__main__":
     tf.app.run()

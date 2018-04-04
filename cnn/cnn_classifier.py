@@ -2,8 +2,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import numpy as np
 import tensorflow as tf
+from cnn_networks import *
+
+CNN_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+TRAIN_PATH = os.path.join(CNN_DIRECTORY, "..", "data", "tfrecords", "train.tfrecords")
+TEST_PATH = os.path.join(CNN_DIRECTORY, "..", "data", "tfrecords", "test.tfrecords")
 
 def dataset_input_fn(filename):
   dataset = tf.data.TFRecordDataset([filename])
@@ -33,7 +39,8 @@ def dataset_input_fn(filename):
   return features, labels
 
 def main(argv):
+    print(TRAIN_PATH)
     print("Running cnn.")
 
 if __name__ == "__main__":  
-    tf.app.run()l
+    tf.app.run()
