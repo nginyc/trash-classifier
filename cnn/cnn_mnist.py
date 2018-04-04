@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from common import load_images
+
 import numpy as np
 import tensorflow as tf
 
@@ -70,11 +72,12 @@ def cnn_model_fn(features, labels, mode):
 
 def main(argv):
   # Load training and eval data
-  mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-  train_data = mnist.train.images # Returns np.array TODO:
-  train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-  eval_data = mnist.test.images # Returns np.array TODO:
-  eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+  # mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+  (train_data, train_labels) = load_images()
+  # train_data = mnist.train.images # Returns np.array TODO:
+  # train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
+  # eval_data = mnist.test.images # Returns np.array TODO:
+  # eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
 
   # Create the Estimator
   mnist_classifier = tf.estimator.Estimator(
@@ -98,13 +101,13 @@ def main(argv):
       hooks=[logging_hook])
 
   # Evaluate the model and print results
-  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": eval_data},
-      y=eval_labels,
-      num_epochs=1,
-      shuffle=False)
-  eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
-  print(eval_results)
+  # eval_input_fn = tf.estimator.inputs.numpy_input_fn(
+  #     x={"x": eval_data},
+  #     y=eval_labels,
+  #     num_epochs=1,
+  #     shuffle=False)
+  # eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
+  # print(eval_results)
 
 if __name__ == "__main__":
   tf.app.run()
