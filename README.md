@@ -129,7 +129,7 @@ out_width  = ceil(float(in_width - filter_width + 1) / float(strides[2]))
 11. Dropout Layer 1
 
     Input Shape: `[-1, 4096]`  
-    Dropout Rate: `0.4`  
+    Dropout Rate: `0.2`  
     Output Shape: `[-1, 4096]`  
 
 12. Dense Layer 2
@@ -142,11 +142,11 @@ out_width  = ceil(float(in_width - filter_width + 1) / float(strides[2]))
 13. Dropout Layer 2
 
     Input Shape: `[-1, 4096]`  
-    Dropout Rate: `0.4`  
-    Output Shape: `[-1, 4096]`
+    Dropout Rate: `0.2`  
+    Output Shape: `[-1, 4096]`  
 
-14. Dense Layer 3 (Logits)
+14. Logits Layer
 
-    Input Shape: `[-1, 4096]`
-    Number of Neurons: `5`
+    Input Shape: `[-1, 4096]`  
+    Number of Neurons: `5`  
     Output Shape: `[-1, 5]`  
