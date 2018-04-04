@@ -6,7 +6,6 @@ import os
 IMAGE_COUNT_PER_CLASS = int(os.environ.get('IMAGE_COUNT_PER_CLASS', 0))
 DATASET_PATH = os.environ.get('DATASET_PATH',
     os.path.dirname(__file__) + '/../data/garythung-trashnet/trash')
-
 path_tfrecords_train = os.path.join(DATASET_PATH, "train.tfrecords")
 # path_tfrecords_train
 
