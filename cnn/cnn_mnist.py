@@ -71,9 +71,9 @@ def cnn_model_fn(features, labels, mode):
 def main(argv):
   # Load training and eval data
   mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-  train_data = mnist.train.images # Returns np.array
+  train_data = mnist.train.images # Returns np.array TODO:
   train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-  eval_data = mnist.test.images # Returns np.array
+  eval_data = mnist.test.images # Returns np.array TODO:
   eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
 
   # Create the Estimator
