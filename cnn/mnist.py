@@ -27,7 +27,7 @@ def run_experiment(argv=None):
     params = tf.contrib.training.HParams(
         learning_rate=0.002,
         n_classes=10,
-        train_steps=5000,
+        train_steps=100,
         min_eval_frequency=100
     )
 

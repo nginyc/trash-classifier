@@ -11,12 +11,12 @@ TRAIN_FILENAME = "train.tfrecords"
 TEST_FILENAME = "test.tfrecords"
 
 CATEGORIES = {
-    'cardboard': 1,
-    'glass': 2,
-    'metal': 3,
-    'paper': 4,
-    'plastic': 5,
-    'trash': 6 
+    'cardboard': 0,
+    'glass': 1,
+    'metal': 2,
+    'paper': 3,
+    'plastic': 4,
+    'trash': 5 
 }
 
 def get_images_and_labels(file_dir, categories):
@@ -66,25 +66,21 @@ def split(images, labels, ratio):
 
 def convert_to_tfrecord(images, labels, save_dir, name):
     filename = os.path.join(save_dir, name)
-
     writer = tf.python_io.TFRecordWriter(filename)
-    print('\nTransform start......')
     for i in np.arange(0, len(labels)):
         try:
-            image = io.imread(images[i]) # type(image) must be array!
-            image_raw = image.tostring()
+            image_data = tf.gfile.FastGFile(images[i], 'rb').read()
             label = int(labels[i])
             example = tf.train.Example(features=tf.train.Features(feature={
                 'label': int64_feature(label),
-                'image_data': bytes_feature(image_raw)
+                'image_data': bytes_feature(image_data)
             }))
             writer.write(example.SerializeToString())
         except IOError as e:
             print('Could not read:', images[i])
-            print('error: %s' %e)
-            print('Skip it!\n')
+            print('Error: %s' %e)
+            continue
     writer.close()
-    print('Transform done!')
 
 def main(argv):
     images, labels = get_images_and_labels(IMAGE_DIRECTORY, CATEGORIES)

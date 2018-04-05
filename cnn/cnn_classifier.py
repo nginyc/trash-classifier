@@ -16,7 +16,7 @@ TEST_PATH = os.path.join(CNN_DIRECTORY, "..", "data", "tfrecords", "test.tfrecor
 ALEXNET_MODEL_PATH = os.path.join(CNN_DIRECTORY, "..", "model", "alexnet")
 
 def alexnet_model_fn(features, labels, mode, params):
-    inputs = tf.reshape(features["image_data"], [-1, 256, 256, 3])
+    inputs = features["image_data"]
     logits = alexnet_layers_fn(inputs, mode)
 
     predictions = {
@@ -54,7 +54,7 @@ def run_alexnet_experiment(argv=None):
         n_classes=6,
         learning_rate=0.002,
         train_steps=5000,
-        batch_size=32
+        batch_size=8
     )
 
     # Set the run_config and the directory to save the model and stats

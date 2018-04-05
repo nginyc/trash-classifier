@@ -27,7 +27,7 @@ def tfrecords_to_dataset(batch_size, filename):
         parsed = tf.parse_single_example(record, keys_to_features)
 
         # Perform additional preprocessing on the parsed data.
-        image = tf.image.decode_jpeg(parsed["image_data"])
+        image = tf.image.decode_jpeg(parsed["image_data"], channels=3)
         image = tf.image.resize_image_with_crop_or_pad(image, 256, 256)
         image = tf.cast(image, tf.float32)
         label = tf.cast(parsed["label"], tf.int32)
@@ -44,6 +44,7 @@ def tfrecords_to_dataset(batch_size, filename):
             # iterator = dataset.make_one_shot_iterator()
             iterator = dataset.make_initializable_iterator()
             features, labels = iterator.get_next()
+
             filenames = tf.placeholder(tf.string, shape=[None])
             iterator_initializer_hook.iterator_initializer_func = lambda sess: sess.run(
                 iterator.initializer,
