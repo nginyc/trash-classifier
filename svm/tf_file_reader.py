@@ -7,11 +7,11 @@ from PIL import  Image
 # data_path = 'train.tfrecords'  # address to save the hdf5 file
 # DATASET_PATH = os.environ.get('DATASET_PATH',
 #     os.path.join(os.path.dirname(__file__) ,'../data/garythung-trashnet'))
-DATASET_PATH =  os.path.join(os.getcwd(),'../data/garythung-trashnet')
+DATASET_PATH =  os.path.join(os.getcwd(),'../data')
 print(DATASET_PATH)
 # data_path = [DATASET_PATH + '/cardboard/train.tfrecords' , DATASET_PATH + '/trash/train.tfrecords']
-data_path = [os.path.join(DATASET_PATH,'cardboard/train.tfrecords') , os.path.join(DATASET_PATH,'trash/train.tfrecords')]
-# data_path = [os.path.join(DATASET_PATH,'trash/train.tfrecords')]
+# data_path = [os.path.join(DATASET_PATH,'cardboard/train.tfrecords') , os.path.join(DATASET_PATH,'trash/train.tfrecords')]
+data_path = [os.path.join(DATASET_PATH,'tfrecords/train.tfrecords')]
 # with tf.Session() as sess:
 def run():
     with tf.Session() as sess:
@@ -28,7 +28,7 @@ def run():
         features = tf.parse_single_example(serialized_example, features=feature)
         # Convert the image data from string back to the numbers
         image = tf.decode_raw(features['image'], tf.uint8)
-        image = tf.cast(image, tf.float32)
+        # image = tf.cast(image, tf.int32)
 
         # Cast label data into int32
         label = tf.cast(features['label'], tf.int32)
@@ -39,11 +39,11 @@ def run():
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
         train_list = []
-        for i in range(500):
+        for i in range(1000):
             example, l = sess.run([image, label])
             train_list.append((example,l))
             # print (example, l)
         coord.request_stop()
         coord.join(threads)
-        return  train_list
-run()
+        return train_list
+# run()

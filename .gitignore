@@ -1,5 +1,8 @@
 .env/
+.envs/
 .vscode
 __pycache__/
 *.tfrecords
+*.pyc
+*.DS_Stor
 /model

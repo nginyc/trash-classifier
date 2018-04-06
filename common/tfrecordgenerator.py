@@ -5,11 +5,19 @@ import os
 
 IMAGE_COUNT_PER_CLASS = int(os.environ.get('IMAGE_COUNT_PER_CLASS', 0))
 DATASET_PATH = os.environ.get('DATASET_PATH',
-    os.path.dirname(__file__) + '/../data/garythung-trashnet/trash')
+    os.path.dirname(__file__) + '/../data/garythung-trashnet/')
 
-path_tfrecords_train = os.path.join(DATASET_PATH, "train.tfrecords")
+path_tfrecords_train = os.path.join(DATASET_PATH, "../tfrecords/train.tfrecords")
 # path_tfrecords_train
 
+train_path = [
+    os.path.join(DATASET_PATH, "cardboard"),
+    os.path.join(DATASET_PATH, "glass"),
+    os.path.join(DATASET_PATH, "metal"),
+    # os.path.join(DATASET_PATH, "paper"),
+    # os.path.join(DATASET_PATH, "plastic"),
+    # os.path.join(DATASET_PATH, "trash")
+]
 def wrap_int64(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
@@ -34,14 +42,17 @@ def convert(image_paths, labels, out_path):
     # image_paths   List of file-paths for the images.
     # labels        Class-labels for the images.
     # out_path      File-path for the TFRecords output file.
-
+    onlyfiles = []
     print("Converting: " + out_path)
-
-    onlyfiles = [f for f in os.listdir(image_paths) if not f.startswith('.') and f.endswith('.jpg') and os.path.isfile(os.path.join(image_paths, f))]
+    for pathi in image_paths :
+        print(pathi)
+        os.listdir(pathi)
+        onlyfiles = onlyfiles + [os.path.join(pathi, f) for f in os.listdir(pathi) if f.endswith('.jpg') and os.path.isfile(os.path.join(pathi, f))]
+    # onlyfiles =
     # Number of images. Used when printing the progress.
     num_images = len(onlyfiles)
-
-    print(num_images)
+    # print(onlyfiles[0])
+    # print(num_images)
 
     # Open a TFRecordWriter for the output-file.
     with tf.python_io.TFRecordWriter(out_path) as writer:
@@ -52,7 +63,7 @@ def convert(image_paths, labels, out_path):
             print(path)
 
             # Load the image-file using matplotlib's imread function.
-            img = imread(os.path.join(image_paths, path))
+            img = imread(path)
             # Convert the image to raw bytes.
             img_bytes = img.tostring()
 
@@ -76,6 +87,6 @@ def convert(image_paths, labels, out_path):
             # Write the serialized data to the TFRecords file.
             writer.write(serialized)
 
-convert(image_paths=DATASET_PATH, # path to the directory of one of the classes
+convert(image_paths=train_path, # path to the directory of one of the classes
         labels=0, # class id Cardboard maps to 0 and so on
         out_path=path_tfrecords_train)
