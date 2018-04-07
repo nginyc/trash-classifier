@@ -100,6 +100,29 @@ codebook, distortion = vq.kmeans(array,
                                  thresh=1)
 print "CodeBook"
 print codebook
+
+print codebook.shape
+print(codebook[0])
+
+
+# compute a histogram of bag of words
+def computeHistograms(codebook, descriptors):
+    code, dist = vq.vq(descriptors, codebook)
+    histogram_of_words, bin_edges = np.histogram(code,
+                                          bins=range(
+                                              codebook.shape[0] + 1),
+                                          normed=True)
+    return  histogram_of_words
+
+hist = np.array([computeHistograms(codebook, f) for f in onlydes if f is not None ]) # computeHistograms(codebook, onlydes)
+print("Hist")
+
+print(len(hist))
+print(hist[0])
+print(len(hist[0]))
+print(hist.shape)
+
+
 # onlydes
 # TODO : Follwo the example commented out in this part
 # Implement SVM using the code below to best fit out need
