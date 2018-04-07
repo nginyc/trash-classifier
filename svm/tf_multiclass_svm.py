@@ -53,8 +53,8 @@ with tf.Session() as sess:
     sess.run(init_op)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    feature = []
-    onlydes = []
+    feature = list()
+    onlydes = list()
     for data in (dataset):
         # need to transform data from a 1D array to an acceptable form by CV2
         img = data[0][0:512 * 384].reshape(384, 512)
@@ -69,21 +69,27 @@ with tf.Session() as sess:
     coord.request_stop()
     coord.join(threads)
     sess.close()
-print(onlydes[0].shape[0])
 nkeys = len(onlydes)
 print(nkeys)
 
 array = np.zeros((nkeys * 1000, 32))
 pivot = 0
+ignore= 0
+# onlydes = np.array(onlydes)
 for key in range(len(onlydes)):
+    print(key)
     value = onlydes[key]
-    # print(value)
+    if value is None:
+        ignore += 1
+        continue
     nelements = value.shape[0]
     while pivot + nelements > array.shape[0]:
         padding = np.zeros_like(array)
         array = np.vstack((array, padding))
     array[pivot:pivot + nelements] = value
     pivot += nelements
+    print("success")
+print('Ignored Imges ' ,ignore) # imaeges with no substantial description -- strange, need to look at this
 array = np.resize(array, (pivot, 32))
 
 nfeatures = array.shape[0]
