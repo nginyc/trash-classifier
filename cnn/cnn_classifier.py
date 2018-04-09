@@ -10,7 +10,7 @@ import shutil
 alexnet_params = {
     'batch_size': 10,
     'learning_rate': 0.001,
-    'train_steps': 1000,
+    'train_steps': 100,
     'eval_steps': None,
     'num_classes': 6,
     'image_height': 256,
@@ -34,7 +34,7 @@ def get_feature_columns(params):
     return feature_columns
 
 def model_fn(features, labels, mode, params):                                                                                         
-    feature_columns = list(get_feature_columns().values())
+    feature_columns = list(get_feature_columns(params).values())
     images = tf.feature_column.input_layer(
         features=features, feature_columns=feature_columns)
     images = tf.reshape(
@@ -72,7 +72,7 @@ def model_fn(features, labels, mode, params):
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "ha:", ["help", "architecture="])
+        opts, args = getopt.getopt(argv[1:], "ha:", ["help=", "architecture="])
         for opt, arg in opts:
             if opt in ("-h", "--help"):
                 print("{} -a <architecture>".format(argv[0]))
@@ -98,7 +98,7 @@ def main(argv):
         print("Removing previous artifacts...")
         shutil.rmtree(model_directory, ignore_errors=True)
 
-    estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config)
+    estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
     train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
     estimator.train(train_input_fn, max_steps=params['train_steps'])
