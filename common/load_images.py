@@ -1,6 +1,7 @@
 import cv2
 from imutils import paths
 import os
+import numpy as np
 
 '''
     SETTINGS (can be configured with environment variables)
@@ -40,10 +41,11 @@ CLASSES = [
     Loads the image dataset from the filesystem in arrays suitable for training.
     Returns:
       (images, image_labels) where
-        images: list of numpy ndarrays of shape (image_height, image_width, num_channels=3) 
+        images: list of numpy ndarrays of shape (image_height, image_width, num_channels=3), BGR form
+            if if_grayscale, list of numpy ndarrays of shape (image_height, image_width)
         image_labels: list of labels as class indices corresponding to each row of `images`
 '''
-def load_images():
+def load_images(if_grayscale=False):
     print('Loading image data...')
     images = []
     image_labels = []
@@ -55,10 +57,9 @@ def load_images():
         for image_path in image_paths:
             image = cv2.imread(
                 image_path,
-                cv2.IMREAD_COLOR
+                cv2.IMREAD_GRAYSCALE if if_grayscale else cv2.IMREAD_COLOR,
             )
             images.append(image)
             image_labels.append(i)
-    
 
     return (images, image_labels)

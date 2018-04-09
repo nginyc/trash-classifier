@@ -1,23 +1,17 @@
 import numpy as np
 import sys
 import cv2
-import matplotlib
-from sklearn import svm, model_selection, metrics
-matplotlib.use('TkAgg')  # Fixs matplotlib issue in virtualenv
-import matplotlib.pyplot as plt
 import os
 import tensorflow as tf
 import tensorflow_hub as hub
 
+from .train_and_test_svm import train_and_test_svm
 from common import load_images
 
 '''
     SETTINGS (can be configured with environment variables)
 '''
-MAX_ITERATIONS = int(os.environ.get('MAX_ITERATIONS', 1000))
 BATCH_SIZE = int(os.environ.get('BATCH_SIZE', 100))
-KFOLD_SPLITS = int(os.environ.get('KFOLD_SPLITS', 5))
-KFOLD_RANDOM_STATE = int(os.environ.get('KFOLD_RANDOM_STATE', 666))
 TFHUB_INCEPTION_V3_MODULE_SPEC_URL = os.environ.get('TFHUB_INCEPTION_V3_MODULE_SPEC_URL', 
     'https://tfhub.dev/google/imagenet/inception_v3/feature_vector/1')
 
@@ -44,44 +38,6 @@ def extract_inception_bottleneck_feature_vectors(images):
         x_batch = sess.run(bottleneck_tensors)
         X.extend(x_batch)
     return X
-
-def train_and_test_svm(X, y):
-    print('Training & testing model...')
-    X = np.array(X)
-    y = np.array(y)
-    
-    kf = model_selection.KFold(
-        n_splits=KFOLD_SPLITS, random_state=KFOLD_RANDOM_STATE, shuffle=True
-    )
-
-    y_test_predict_list = []
-    y_test_list = []
-    for (i, (train_indices, test_indices)) in enumerate(kf.split(X)):
-        X_train = X[train_indices]
-        y_train = y[train_indices]
-        X_test = X[test_indices]
-        y_test = y[test_indices]
-        print('Training model for fold ' + str(i) + '...')
-        model = svm.SVC(max_iter=MAX_ITERATIONS)
-        model.fit(X_train, y_train)
-        print('Testing model for fold ' + str(i) + '...')
-        y_test_predict = np.array(model.predict(X_test))
-        accuracy = np.sum(y_test_predict == y_test) / y_test.size
-        confusion_matrix = metrics.confusion_matrix(y_test_predict, y_test)
-        print('Accuracy: ' + str(accuracy))
-        print('Confusion matrix:')
-        print(confusion_matrix)
-        y_test_predict_list.append(y_test_predict)
-        y_test_list.append(y_test)
-
-    y_test_predict_comb = np.array(y_test_predict_list).flatten()
-    y_test_comb = np.array(y_test_list).flatten()
-    accuracy_comb = np.sum(y_test_predict_comb == y_test_comb) / y_test_comb.size
-    confusion_matrix_comb = metrics.confusion_matrix(y_test_predict_comb, y_test_comb)
-    print('\n\n')
-    print('Combined accuracy: ' + str(accuracy_comb))
-    print('Combined confusion matrix:')
-    print(confusion_matrix_comb)
 
 def train_svm_raw_pixels():
     (images, image_labels) = load_images()

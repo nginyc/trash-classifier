@@ -31,6 +31,18 @@ python3 . svm_inception_bottleneck
 python3 . svm_raw_pixels
 ```
 
+```bash
+python3 . svm_sift_kmeans
+```
+
+```bash
+python3 . svm_orb_kmeans
+```
+
+```bash
+python3 . svm_colour_orb_kmeans
+```
+
 ## Running CNN Classifier
 
 ```bash

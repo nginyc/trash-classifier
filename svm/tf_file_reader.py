@@ -7,7 +7,7 @@ from PIL import  Image
 # data_path = 'train.tfrecords'  # address to save the hdf5 file
 # DATASET_PATH = os.environ.get('DATASET_PATH',
 #     os.path.join(os.path.dirname(__file__) ,'../data/garythung-trashnet'))
-DATASET_PATH =  os.path.join(os.getcwd(),'../data')
+DATASET_PATH =  os.path.join(os.path.dirname(__file__),'../data')
 print(DATASET_PATH)
 # data_path = [DATASET_PATH + '/cardboard/train.tfrecords' , DATASET_PATH + '/trash/train.tfrecords']
 # data_path = [os.path.join(DATASET_PATH,'cardboard/train.tfrecords') , os.path.join(DATASET_PATH,'trash/train.tfrecords')]
