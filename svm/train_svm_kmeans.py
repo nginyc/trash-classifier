@@ -32,6 +32,15 @@ def train_svm_colour_orb_kmeans():
   y = image_labels
   train_and_test_svm(X, y)
 
+def train_svm_colour_sift_kmeans():
+  (images, image_labels) = load_images()
+  X_blue = extract_sift_kmeans_feature_vectors([[[pixel[0] for pixel in row] for row in image] for image in images])
+  X_green = extract_sift_kmeans_feature_vectors([[[pixel[1] for pixel in row] for row in image] for image in images])
+  X_red = extract_sift_kmeans_feature_vectors([[[pixel[2] for pixel in row] for row in image] for image in images])
+  X = [np.concatenate((b, g, r)) for (b, g, r) in zip(X_blue, X_green, X_red)]
+  y = image_labels
+  train_and_test_svm(X, y)
+
 # Ref: https://dsp.stackexchange.com/questions/5979/image-classification-using-sift-features-and-svm
 def extract_sift_kmeans_feature_vectors(images_gray):
   print('Extracting SIFT features...')

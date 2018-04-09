@@ -43,6 +43,10 @@ python3 . svm_orb_kmeans
 python3 . svm_colour_orb_kmeans
 ```
 
+```bash
+python3 . svm_colour_sift_kmeans
+```
+
 ## Running CNN Classifier
 
 ```bash

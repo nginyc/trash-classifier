@@ -309,3 +309,32 @@ Combined test confusion matrix:
  [12  7  6 20  6]
  [ 4  9 12  4 21]]
  ```
+ 
+## Settings & Results for RGB-SIFT features + KMeans
+
+Run with `python . svm_colour_sift_kmeans`.
+
+(1) 
+
+```
+SVM_C_PARAM=10 
+IMAGE_COUNT_PER_CLASS=50 
+IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS=True
+IF_BINARY_FEATURES=True
+```
+```
+Combined train accuracy: 0.979
+Combined train confusion matrix:
+[[198   0   0   8   6]
+ [  2 200   0   2   3]
+ [  0   0 200   0   0]
+ [  0   0   0 190   0]
+ [  0   0   0   0 191]]
+Combined test accuracy: 0.484
+Combined test confusion matrix:
+[[27 12  3 14  8]
+ [ 6 17 11  4  6]
+ [ 4 18 24  1  6]
+ [10  1  7 29  6]
+ [ 3  2  5  2 24]]
+```
