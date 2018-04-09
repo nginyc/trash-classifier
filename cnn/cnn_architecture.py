@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-def alexnet_architecture(input_layer, params, mode=tf.estimator.ModeKeys.TRAIN):
+def alexnet_architecture(input_layer, params, mode):
     print("Input shape: {}".format(input_layer.shape))
 
     # Convolution Layer 1
