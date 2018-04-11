@@ -46,8 +46,9 @@ def model_fn(features, labels, mode, params):
 
     if mode in (tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL):
         global_step = tf.train.get_or_create_global_step()
-        label_indices = tf.argmax(input=labels, axis=1)
-        loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+        label_indices = tf.argmax(input=logits, axis=1)
+        # loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+        loss = tf.losses.sparse_softmax_cross_entropy(labels=label_indices, logits=logits)
         tf.summary.scalar('cross_entropy', loss)
 
     predicted_indices = tf.argmax(input=logits, axis=1)
@@ -65,6 +66,9 @@ def model_fn(features, labels, mode, params):
         return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
 
     if mode == tf.estimator.ModeKeys.EVAL:
+        print("labels: ", labels.shape)
+        print("Label indices: ", label_indices.shape)
+        print("predicted: ", predicted_indices.shape)
         eval_metric_ops = {
             'accuracy': tf.metrics.accuracy(label_indices, predicted_indices)
         }
@@ -94,16 +98,16 @@ def main(argv):
         model_dir=model_directory
     )
     
-    if not params['use_checkpoint']:
-        print("Removing previous artifacts...")
-        shutil.rmtree(model_directory, ignore_errors=True)
+    # if not params['use_checkpoint']:
+    #     print("Removing previous artifacts...")
+    #     shutil.rmtree(model_directory, ignore_errors=True)
 
     estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
-    tensors_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
-    train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
-    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
+    # tensors_to_log = {"probabilities": "softmax_tensor"}
+    # logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
+    # train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
+    # estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
     
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'])

@@ -41,7 +41,7 @@ def generate_input_fn(file_names, params, mode=tf.estimator.ModeKeys.EVAL):
 
     dataset = dataset.repeat(None)
     dataset = dataset.batch(params['batch_size'])
-    dataset = dataset.prefetch(2 * params['batch_size'])
+    # dataset = dataset.prefetch(2 * params['batch_size'])
 
     images, labels = dataset.make_one_shot_iterator().get_next()
 
