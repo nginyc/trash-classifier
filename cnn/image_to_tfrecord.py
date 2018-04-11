@@ -18,14 +18,15 @@ CATEGORIES = {
     'trash': 5 
 }
 
-SPLIT_RATIO = 0.7
+SPLIT_RATIO = 0.8
 
 def get_images_and_labels(file_dir, categories):
     images = []
     subfolders = []
     for root, sub_folders, files in os.walk(file_dir):
         for name in files:
-            images.append(os.path.join(root, name))
+            if "jpg" in name:
+                images.append(os.path.join(root, name))
         for name in sub_folders:
             subfolders.append(os.path.join(root, name))
 
@@ -39,8 +40,8 @@ def get_images_and_labels(file_dir, categories):
     temp = temp.transpose()
     np.random.shuffle(temp)
     
-    image_list = list(temp[:, 0])
-    label_list = list(temp[:, 1])
+    image_list = list(temp[:,0])
+    label_list = list(temp[:,1])
     label_list = [int(float(i)) for i in label_list]
 
     return image_list, label_list
