@@ -7,11 +7,12 @@ import math
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import InputLayer, Input
-from tensorflow.python.keras.layers import Reshape, MaxPooling2D
+from tensorflow.python.keras.layers import Reshape, MaxPooling2D, Dropout
 from tensorflow.python.keras.layers import Conv2D, Dense, Flatten
 from tensorflow.python.keras.callbacks import TensorBoard
 from tensorflow.python.keras.optimizers import Adam
 from tensorflow.python.keras.models import load_model
+from tensorflow.python.keras.layers import BatchNormalization
 
 import skopt
 from skopt import gp_minimize, forest_minimize
@@ -36,24 +37,25 @@ dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform',
 
 # search dimension for number of dense layers
 # return int n layers
-dim_num_dense_layers = Integer(low=1, high=5, name='num_dense_layers')
+# dim_num_dense_layers = Integer(low=1, high=5, name='num_dense_layers')
 
 # search dimension for number of nodes for each dense layer
 # return int n nodes
-dim_num_dense_nodes = Integer(low=5, high=512, name='num_dense_nodes')
+# dim_num_dense_nodes = Integer(low=5, high=512, name='num_dense_nodes')
 
 # search dimension for activation function
 # return relu or sigmoid
-dim_activation = Categorical(categories=['relu', 'sigmoid'],
-                             name='activation')
+# dim_activation = Categorical(categories=['relu', 'sigmoid'],
+#                              name='activation')
 
-dimensions = [dim_learning_rate,
-              dim_num_dense_layers,
-              dim_num_dense_nodes,
-              dim_activation]
+dimensions = [dim_learning_rate]
+#               dim_num_dense_layers,
+#               dim_num_dense_nodes,
+#               dim_activation]
 
 # TODO: substitue with parameters that we have found to be good
-default_parameters = [1e-5, 1, 16, 'relu']
+# default_parameters = [1e-5, 1, 16, 'relu']
+default_parameters = [0.002]
 
 # load data #TODO: should load our own datasets
 from tensorflow.examples.tutorials.mnist import input_data
@@ -96,17 +98,19 @@ cls_true = data.test.cls[0:9]
 
 
 # logger for training progress
-def log_dir_name(learning_rate, num_dense_layers,
-                 num_dense_nodes, activation):
+def log_dir_name(learning_rate):
+# , num_dense_layers,
+#                  num_dense_nodes, activation):
 
     # The dir-name for the TensorBoard log-dir.
-    s = "./19_logs/lr_{0:.0e}_layers_{1}_nodes_{2}_{3}/"
+    # s = "./19_logs/lr_{0:.0e}_layers_{1}_nodes_{2}_{3}/"
+    s = "./19_logs/lr_{0:.0e}/"
 
     # Insert all the hyper-parameters in the dir-name.
-    log_dir = s.format(learning_rate,
-                       num_dense_layers,
-                       num_dense_nodes,
-                       activation)
+    log_dir = s.format(learning_rate)
+                       # num_dense_layers,
+                       # num_dense_nodes,
+                       # activation)
 
     return log_dir
 
@@ -162,8 +166,9 @@ def plot_example_errors(cls_pred):
 
 # TODO: replace parameters with those that we want to tune
 # return either alexnet or zf model
-def create_model(learning_rate, num_dense_layers,
-                 num_dense_nodes, activation):
+def create_model(learning_rate):
+	# , num_dense_layers,
+	#                  num_dense_nodes, activation):
     """
     Hyper-parameters:
     learning_rate:     Learning-rate for the optimizer.
@@ -172,7 +177,7 @@ def create_model(learning_rate, num_dense_layers,
     activation:        Activation function for all layers.
     """
     
-    # Start construction of a Keras Sequential model.
+    # AlexNet Define the Model
     model = Sequential()
 
     # Add an input layer which is similar to a feed_dict in TensorFlow.
@@ -183,40 +188,54 @@ def create_model(learning_rate, num_dense_layers,
     # but the convolutional layers expect images with shape (28, 28, 1)
     model.add(Reshape(img_shape_full))
 
-    # First convolutional layer.
-    # There are many hyper-parameters in this layer, but we only
-    # want to optimize the activation-function in this example.
-    model.add(Conv2D(kernel_size=5, strides=1, filters=16, padding='same',
-                     activation=activation, name='layer_conv1'))
-    model.add(MaxPooling2D(pool_size=2, strides=2))
+    # https://github.com/jkh911208/cswithjames/blob/master/8_CIFAR10_alexnet.py
+    # model.add(Conv2D(96, (11,11), strides=(4,4), activation='relu', padding='same', input_shape=(img_height, img_width, channel,)))
+    # for original Alexnet
+    model.add(Conv2D(96, (3,3), strides=(2,2), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
+    # Local Response normalization for Original Alexnet
+    model.add(BatchNormalization())
 
-    # Second convolutional layer.
-    # Again, we only want to optimize the activation-function here.
-    model.add(Conv2D(kernel_size=5, strides=1, filters=36, padding='same',
-                     activation=activation, name='layer_conv2'))
-    model.add(MaxPooling2D(pool_size=2, strides=2))
+    model.add(Conv2D(256, (5,5), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2,2)))
+    # Local Response normalization for Original Alexnet
+    model.add(BatchNormalization())
 
-    # Flatten the 4-rank output of the convolutional layers
-    # to 2-rank that can be input to a fully-connected / dense layer.
+    model.add(Conv2D(384, (3,3), activation='relu', padding='same'))
+    model.add(Conv2D(384, (3,3), activation='relu', padding='same'))
+    model.add(Conv2D(256, (3,3), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2,2)))
+    # Local Response normalization for Original Alexnet
+    model.add(BatchNormalization())
+
     model.add(Flatten())
+    model.add(Dense(4096, activation='tanh'))
+    model.add(Dropout(0.5))
+    model.add(Dense(4096, activation='tanh'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
+
+
+    # print the model summary
+    model.summary()
 
     # Add fully-connected / dense layers.
     # The number of layers is a hyper-parameter we want to optimize.
-    for i in range(num_dense_layers):
-        # Name of the layer. This is not really necessary
-        # because Keras should give them unique names.
-        name = 'layer_dense_{0}'.format(i+1)
+    # for i in range(num_dense_layers):
+    #     # Name of the layer. This is not really necessary
+    #     # because Keras should give them unique names.
+    #     name = 'layer_dense_{0}'.format(i+1)
 
-        # Add the dense / fully-connected layer to the model.
-        # This has two hyper-parameters we want to optimize:
-        # The number of nodes and the activation function.
-        model.add(Dense(num_dense_nodes,
-                        activation=activation,
-                        name=name))
+    #     # Add the dense / fully-connected layer to the model.
+    #     # This has two hyper-parameters we want to optimize:
+    #     # The number of nodes and the activation function.
+    #     model.add(Dense(num_dense_nodes,
+    #                     activation=activation,
+    #                     name=name))
 
     # Last fully-connected / dense layer with softmax-activation
     # for use in classification.
-    model.add(Dense(num_classes, activation='softmax'))
+    # model.add(Dense(num_classes, activation='softmax'))
     
     # Use the Adam method for training the network.
     # We want to find the best learning-rate for the Adam method.
@@ -230,8 +249,9 @@ def create_model(learning_rate, num_dense_layers,
     return model
 
 @use_named_args(dimensions=dimensions)
-def fitness(learning_rate, num_dense_layers,
-            num_dense_nodes, activation):
+def fitness(learning_rate):
+	# , num_dense_layers,
+ #            num_dense_nodes, activation):
     """
     Hyper-parameters:
     learning_rate:     Learning-rate for the optimizer.
@@ -242,20 +262,21 @@ def fitness(learning_rate, num_dense_layers,
 
     # Print the hyper-parameters.
     print('learning rate: {0:.1e}'.format(learning_rate))
-    print('num_dense_layers:', num_dense_layers)
-    print('num_dense_nodes:', num_dense_nodes)
-    print('activation:', activation)
+    # print('num_dense_layers:', num_dense_layers)
+    # print('num_dense_nodes:', num_dense_nodes)
+    # print('activation:', activation)
     print()
     
     # Create the neural network with these hyper-parameters.
-    model = create_model(learning_rate=learning_rate,
-                         num_dense_layers=num_dense_layers,
-                         num_dense_nodes=num_dense_nodes,
-                         activation=activation)
+    model = create_model(learning_rate=learning_rate)
+                         # num_dense_layers=num_dense_layers,
+                         # num_dense_nodes=num_dense_nodes,
+                         # activation=activation)
 
     # Dir-name for the TensorBoard log-files.
-    log_dir = log_dir_name(learning_rate, num_dense_layers,
-                           num_dense_nodes, activation)
+    log_dir = log_dir_name(learning_rate)
+    # , num_dense_layers,
+    #                        num_dense_nodes, activation)
     
     # Create a callback-function for Keras which will be
     # run after each epoch has ended during training.
