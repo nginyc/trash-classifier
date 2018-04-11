@@ -1,11 +1,12 @@
 import tensorflow as tf
 
-def alexnet_architecture(input_layer, params, mode):
-    print("Input shape: {}".format(input_layer.shape))
+def alexnet_architecture(features, params, mode):
+    # print("Input shape: {}".format(input_layer.shape))
+    inputs = tf.reshape(features['images'], [-1, params['image_height'], params['image_width'], params['image_channels']])  
 
     # Convolution Layer 1
     conv1 = tf.layers.conv2d(
-        inputs=input_layer,
+        inputs=inputs,
         filters=96,
         kernel_size=[11, 11],
         strides=4,
@@ -83,7 +84,7 @@ def alexnet_architecture(input_layer, params, mode):
     # Dropout Layer 1
     dropout1 = tf.layers.dropout(
         inputs=dense1, 
-        rate=0.2, 
+        rate=0.5, 
         training=mode == tf.estimator.ModeKeys.TRAIN)
     print("Dropout1 shape: {}".format(dropout1.shape))
 
@@ -97,7 +98,7 @@ def alexnet_architecture(input_layer, params, mode):
     # Dropout Layer 2
     dropout2 = tf.layers.dropout(
         inputs=dense2, 
-        rate=0.2, 
+        rate=0.5, 
         training=mode == tf.estimator.ModeKeys.TRAIN)
     print("Dropout2 shape: {}".format(dropout2.shape))
     

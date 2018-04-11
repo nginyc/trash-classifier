@@ -22,8 +22,7 @@ def standardize(image):
     return tf.image.per_image_standardization(image)
 
 def preprocess_image(image, params, is_training=False):
-    if is_training:
-        image = resize_image(image, params['image_height'], params['image_width'])
+    image = resize_image(image, params['image_height'], params['image_width'])
     image = standardize(image)
     return image
 
@@ -41,7 +40,7 @@ def generate_input_fn(file_names, params, mode=tf.estimator.ModeKeys.EVAL):
 
     dataset = dataset.repeat(None)
     dataset = dataset.batch(params['batch_size'])
-    # dataset = dataset.prefetch(2 * params['batch_size'])
+    dataset = dataset.prefetch(2 * params['batch_size'])
 
     images, labels = dataset.make_one_shot_iterator().get_next()
 
