@@ -160,6 +160,8 @@ def plot_example_errors(cls_pred):
                 cls_true=cls_true[0:9],
                 cls_pred=cls_pred[0:9])
 
+# TODO: replace parameters with those that we want to tune
+# return either alexnet or zf model
 def create_model(learning_rate, num_dense_layers,
                  num_dense_nodes, activation):
     """
@@ -317,8 +319,9 @@ def fitness(learning_rate, num_dense_layers,
 # plot_images(images=images, cls_true=cls_true)
 
 # test run
-fitness(x=default_parameters)
+# fitness(x=default_parameters)
 
+# run model
 search_result = gp_minimize(func=fitness,
                             dimensions=dimensions,
                             acq_func='EI', # Expected Improvement.
@@ -329,3 +332,4 @@ print(search_result.x)
 space = search_result.space
 print(space.point_to_dict(search_result.x))
 print(search_result.fun)
+plot_convergence(search_result)
