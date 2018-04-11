@@ -33,15 +33,15 @@ def get_images_and_labels(file_dir, categories):
     labels = []
     for subfolder in subfolders:        
         no_images = len(os.listdir(subfolder))
-        category = subfolder.split('/')[-1]
+        category = subfolder.replace("\\", "/").split('/')[-1] # todo
         labels = np.append(labels, [categories[category]] * no_images)
 
     temp = np.array([images, labels])
     temp = temp.transpose()
     np.random.shuffle(temp)
     
-    image_list = list(temp[:,0])
-    label_list = list(temp[:,1])
+    image_list = list(temp[:, 0])
+    label_list = list(temp[:, 1])
     label_list = [int(float(i)) for i in label_list]
 
     return image_list, label_list
@@ -68,7 +68,7 @@ def convert_to_tfrecord(images, labels, save_dir, name):
     writer = tf.python_io.TFRecordWriter(filename)
     for i in np.arange(0, len(labels)):
         try:
-            path = images[i].split('/')[-2:]
+            path = images[i].replace("\\", "/").split('/')[-2:]
             print("Converting image: {0}/{1}".format(path[0],path[1]))
             image = tf.gfile.FastGFile(images[i], 'rb').read()
             label = int(labels[i])
