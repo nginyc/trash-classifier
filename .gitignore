@@ -3,3 +3,4 @@
 __pycache__/
 *.tfrecords
 /model
+.DS_Store
