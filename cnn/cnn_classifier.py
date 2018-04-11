@@ -26,8 +26,26 @@ alexnet_params = {
     'model_name': 'alexnet_model'
 }
 
+zfnet_params = {
+    'batch_size': 2,
+    'learning_rate': 0.002,
+    'train_steps': 10,
+    'eval_steps': 1,
+    'num_classes': 6,
+    'image_height': 256,
+    'image_width': 256,
+    'image_channels': 3,
+    'architecture': zfnet_layers_fn,
+    'save_checkpoints_steps': 100,
+    'use_checkpoint': False,
+    'log_step_count_steps': 1,
+    'tf_random_seed': 20170409,
+    'model_name': 'zfnet_model'
+}
+
 architecture = {
-    'alexnet': alexnet_params
+    'alexnet': alexnet_params,
+    'zfnet': zfnet_params
 }
 
 def get_feature_columns(params):
