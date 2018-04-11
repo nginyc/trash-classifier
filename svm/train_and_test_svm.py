@@ -4,6 +4,7 @@ import matplotlib
 import os
 from sklearn.cluster import KMeans
 
+from .visualize_features import visualize_features
 '''
     SETTINGS (can be configured with environment variables)
 '''
@@ -105,7 +106,8 @@ def compute_kmeans_cluster_vectors(image_keypoint_lists):
     #   num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
     num_clusters = len(image_keypoint_lists)
     print('Computing KMeans clusters with n_clusters=' + str(num_clusters) + '...')
-    kmeans = KMeans(n_clusters=num_clusters)
+    # n_jobs=-2 makes it runn all all cores except 1. As compated to when it was 1 and ran sequentially :(
+    kmeans = KMeans(n_clusters=num_clusters, n_jobs=-2)
     kmeans.fit(flattened_image_keypoints)
 
     cluster_vectors = []
