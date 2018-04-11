@@ -10,9 +10,9 @@ import shutil
 tf.logging.set_verbosity(tf.logging.INFO)
 
 alexnet_params = {
-    'batch_size': 100,
+    'batch_size': 2,
     'learning_rate': 0.002,
-    'train_steps': 1000,
+    'train_steps': 10,
     'eval_steps': 1,
     'num_classes': 6,
     'image_height': 256,
@@ -21,7 +21,7 @@ alexnet_params = {
     'architecture': alexnet_architecture,
     'save_checkpoints_steps': 100,
     'use_checkpoint': False,
-    'log_step_count_steps': 10,
+    'log_step_count_steps': 1,
     'tf_random_seed': 20170409,
     'model_name': 'alexnet_model'
 }
@@ -36,21 +36,13 @@ def get_feature_columns(params):
     }
     return feature_columns
 
-def model_fn(features, labels, mode, params):                                                                                   
-    # feature_columns = list(get_feature_columns(params).values())
-    # images = tf.feature_column.input_layer(
-    #     features=features, feature_columns=feature_columns)
-    # images = tf.reshape(
-    #     images, shape=(-1, params['image_height'], params['image_width'], params['image_channels']))
-
-    # inputs = tf.reshape(features['images'], [-1, params['image_height'], params['image_width'], params['image_channels']])                                                                                         
+def model_fn(features, labels, mode, params):                                                                                                                                                                         
     logits = params['architecture'](features, params, mode)
 
     if mode in (tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL):
         global_step = tf.train.get_or_create_global_step()
         label_indices = tf.argmax(input=logits, axis=1)
         loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
-        # loss = tf.losses.sparse_softmax_cross_entropy(labels=label_indices, logits=logits)
         tf.summary.scalar('cross_entropy', loss)
 
     predicted_indices = tf.argmax(input=logits, axis=1)
@@ -87,7 +79,7 @@ def main(argv):
         sys.exit()
 
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    model_directory =  os.path.join(current_directory, "..", "model", "alexnet", params['model_name'])
+    model_directory =  os.path.join(current_directory, "..", "model", params['model_name'])
     train_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "train.tfrecords")]
     test_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "test.tfrecords")]
 
@@ -105,7 +97,8 @@ def main(argv):
     estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
     tensors_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log)
+    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
+
     train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
     estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
     
