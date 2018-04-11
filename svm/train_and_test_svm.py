@@ -116,7 +116,7 @@ def compute_kmeans_cluster_vectors(image_keypoint_lists):
         # Get cluster number histogram as feature vector
         cluster_vector = [(clusters == i).sum() for i in range(0, num_clusters)]
         if IF_BINARY_FEATURES:
-            print("Using Binary Features")
+            # print("Using Binary Features")
             cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
 
         cluster_vectors.append(cluster_vector)
