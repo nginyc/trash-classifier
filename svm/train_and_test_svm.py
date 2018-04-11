@@ -4,7 +4,6 @@ import matplotlib
 import os
 from sklearn.cluster import KMeans
 
-from .visualize_features import visualize_features
 '''
     SETTINGS (can be configured with environment variables)
 '''
