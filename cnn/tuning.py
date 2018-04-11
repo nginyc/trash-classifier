@@ -191,27 +191,28 @@ def create_model(learning_rate):
     # https://github.com/jkh911208/cswithjames/blob/master/8_CIFAR10_alexnet.py
     # model.add(Conv2D(96, (11,11), strides=(4,4), activation='relu', padding='same', input_shape=(img_height, img_width, channel,)))
     # for original Alexnet
-    model.add(Conv2D(96, (3,3), strides=(2,2), activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
-    # Local Response normalization for Original Alexnet
-    model.add(BatchNormalization())
+    model.add(Conv2D(filters=96, kernel=(11,11), strides=4, activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2)
+    # # Local Response normalization for Original Alexnet
+    # model.add(BatchNormalization())
 
-    model.add(Conv2D(256, (5,5), activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2,2)))
-    # Local Response normalization for Original Alexnet
-    model.add(BatchNormalization())
+    model.add(Conv2D(filters=192, kernel=(5,5), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2)
+    # # Local Response normalization for Original Alexnet
+    # model.add(BatchNormalization())
 
-    model.add(Conv2D(384, (3,3), activation='relu', padding='same'))
-    model.add(Conv2D(384, (3,3), activation='relu', padding='same'))
-    model.add(Conv2D(256, (3,3), activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2,2)))
+    model.add(Conv2D(filters=288, kernel=(3,3), activation='relu', padding='same'))
+    model.add(Conv2D(filters=288, kernel=(3,3), activation='relu', padding='same'))
+    model.add(Conv2D(filters=192, kernel=(3,3), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
+
     # Local Response normalization for Original Alexnet
-    model.add(BatchNormalization())
+    # model.add(BatchNormalization())
 
     model.add(Flatten())
-    model.add(Dense(4096, activation='tanh'))
+    model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(4096, activation='tanh'))
+    model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='softmax'))
 
