@@ -50,55 +50,8 @@ dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform',
 #                              name='activation')
 
 dimensions = [dim_learning_rate]
-#               dim_num_dense_layers,
-#               dim_num_dense_nodes,
-#               dim_activation]
 
-# TODO: substitue with parameters that we have found to be good
-# default_parameters = [1e-5, 1, 16, 'relu']
 default_parameters = [0.002]
-
-# load data #TODO: should load our own datasets
-# from tensorflow.examples.tutorials.mnist import input_data
-# data = input_data.read_data_sets('data/MNIST/', one_hot=True)
-
-# print(data.train.labels)
-
-# # check data set
-# print("Size of:")
-# print("- Training-set:\t\t{}".format(len(data.train.labels)))
-# print("- Test-set:\t\t{}".format(len(data.test.labels)))
-# print("- Validation-set:\t{}".format(len(data.validation.labels)))
-
-# data.test.cls = np.argmax(data.test.labels, axis=1)
-# validation_data = (data.validation.images, data.validation.labels)
-
-# We know that MNIST images are 28 pixels in each dimension.
-# img_size = 28
-
-# # Images are stored in one-dimensional arrays of this length.
-# img_size_flat = img_size * img_size
-
-# # Tuple with height and width of images used to reshape arrays.
-# # This is used for plotting the images.
-# img_shape = (img_size, img_size)
-
-# # Tuple with height, width and depth used to reshape arrays.
-# # This is used for reshaping in Keras.
-# img_shape_full = (img_size, img_size, 1)
-
-# # Number of colour channels for the images: 1 channel for gray-scale.
-# num_channels = 1
-
-# # Number of classes, one class for each of 10 digits.
-# num_classes = 10
-
-# # Get the first images from the test-set.
-# images = data.test.images[0:9]
-
-# # Get the true classes for those images.
-# cls_true = data.test.cls[0:9]
-
 
 # logger for training progress
 def log_dir_name(learning_rate):
@@ -167,110 +120,12 @@ def plot_example_errors(cls_pred):
                 cls_true=cls_true[0:9],
                 cls_pred=cls_pred[0:9])
 
-# TODO: replace parameters with those that we want to tune
-# return either alexnet or zf model
-# def create_model(learning_rate):
-# 	# , num_dense_layers,
-# 	#                  num_dense_nodes, activation):
-#     """
-#     Hyper-parameters:
-#     learning_rate:     Learning-rate for the optimizer.
-#     num_dense_layers:  Number of dense layers.
-#     num_dense_nodes:   Number of nodes in each dense layer.
-#     activation:        Activation function for all layers.
-#     """
-    
-#     # AlexNet Define the Model
-#     model = Sequential()
-
-#     # Add an input layer which is similar to a feed_dict in TensorFlow.
-#     # Note that the input-shape must be a tuple containing the image-size.
-#     model.add(InputLayer(input_shape=(img_size_flat,)))
-
-#     # The input from MNIST is a flattened array with 784 elements,
-#     # but the convolutional layers expect images with shape (28, 28, 1)
-#     model.add(Reshape(img_shape_full))
-
-#     # https://github.com/jkh911208/cswithjames/blob/master/8_CIFAR10_alexnet.py
-#     # model.add(Conv2D(96, (11,11), strides=(4,4), activation='relu', padding='same', input_shape=(img_height, img_width, channel,)))
-#     # for original Alexnet
-#     model.add(Conv2D(filters=96, kernel=(11,11), strides=4, activation='relu', padding='same'))
-#     model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
-#     # # Local Response normalization for Original Alexnet
-#     # model.add(BatchNormalization())
-
-#     model.add(Conv2D(filters=192, kernel=(5,5), activation='relu', padding='same'))
-#     model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
-#     # # Local Response normalization for Original Alexnet
-#     # model.add(BatchNormalization())
-
-#     model.add(Conv2D(filters=288, kernel=(3,3), activation='relu', padding='same'))
-#     model.add(Conv2D(filters=288, kernel=(3,3), activation='relu', padding='same'))
-#     model.add(Conv2D(filters=192, kernel=(3,3), activation='relu', padding='same'))
-#     model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
-
-#     # Local Response normalization for Original Alexnet
-#     # model.add(BatchNormalization())
-
-#     model.add(Flatten())
-#     model.add(Dense(4096, activation='relu'))
-#     model.add(Dropout(0.5))
-#     model.add(Dense(4096, activation='relu'))
-#     model.add(Dropout(0.5))
-#     model.add(Dense(num_classes, activation='softmax'))
-
-
-#     # print the model summary
-#     model.summary()
-
-#     # Add fully-connected / dense layers.
-#     # The number of layers is a hyper-parameter we want to optimize.
-#     # for i in range(num_dense_layers):
-#     #     # Name of the layer. This is not really necessary
-#     #     # because Keras should give them unique names.
-#     #     name = 'layer_dense_{0}'.format(i+1)
-
-#     #     # Add the dense / fully-connected layer to the model.
-#     #     # This has two hyper-parameters we want to optimize:
-#     #     # The number of nodes and the activation function.
-#     #     model.add(Dense(num_dense_nodes,
-#     #                     activation=activation,
-#     #                     name=name))
-
-#     # Last fully-connected / dense layer with softmax-activation
-#     # for use in classification.
-#     # model.add(Dense(num_classes, activation='softmax'))
-    
-#     # Use the Adam method for training the network.
-#     # We want to find the best learning-rate for the Adam method.
-#     optimizer = Adam(lr=learning_rate)
-    
-#     # In Keras we need to compile the model so it can be trained.
-#     model.compile(optimizer=optimizer,
-#                   loss='categorical_crossentropy',
-#                   metrics=['accuracy'])
-    
-#     return model
-
 @use_named_args(dimensions=dimensions)
 def _fitness(learning_rate):
-    params = {
-        'batch_size': 2,
-        'learning_rate': learning_rate,
-        'train_steps': 10,
-        'eval_steps': 1,
-        'num_classes': 6,
-        'image_height': 256,
-        'image_width': 256,
-        'image_channels': 3,
-        'architecture': alexnet_architecture,
-        'save_checkpoints_steps': 100,
-        'use_checkpoint': False,
-        'log_step_count_steps': 1,
-        'tf_random_seed': 20170409,
-        'model_name': 'alexnet_model'
+    params = alexnet_params
+    params['learning_rate'] = learning_rate
 
-    }
+    # from main in cnn_classifier
     current_directory = os.path.dirname(os.path.abspath(__file__))
     model_directory =  os.path.join(current_directory, "..", "model", params['model_name'])
     train_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "train.tfrecords")]
@@ -297,102 +152,13 @@ def _fitness(learning_rate):
     
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
+
+    # skopt finds minimum, so we invert the accuracy
     return -eval_results['accuracy']
 
 
-# @use_named_args(dimensions=dimensions)
-# def fitness(learning_rate):
-# 	# , num_dense_layers,
-#  #            num_dense_nodes, activation):
-#     """
-#     Hyper-parameters:
-#     learning_rate:     Learning-rate for the optimizer.
-#     num_dense_layers:  Number of dense layers.
-#     num_dense_nodes:   Number of nodes in each dense layer.
-#     activation:        Activation function for all layers.
-#     """
-
-#     # Print the hyper-parameters.
-#     print('learning rate: {0:.1e}'.format(learning_rate))
-#     # print('num_dense_layers:', num_dense_layers)
-#     # print('num_dense_nodes:', num_dense_nodes)
-#     # print('activation:', activation)
-#     print()
-    
-#     # Create the neural network with these hyper-parameters.
-#     model = create_model(learning_rate=learning_rate)
-#                          # num_dense_layers=num_dense_layers,
-#                          # num_dense_nodes=num_dense_nodes,
-#                          # activation=activation)
-
-#     # Dir-name for the TensorBoard log-files.
-#     log_dir = log_dir_name(learning_rate)
-#     # , num_dense_layers,
-#     #                        num_dense_nodes, activation)
-    
-#     # Create a callback-function for Keras which will be
-#     # run after each epoch has ended during training.
-#     # This saves the log-files for TensorBoard.
-#     # Note that there are complications when histogram_freq=1.
-#     # It might give strange errors and it also does not properly
-#     # support Keras data-generators for the validation-set.
-#     callback_log = TensorBoard(
-#         log_dir=log_dir,
-#         histogram_freq=0,
-#         batch_size=32,
-#         write_graph=True,
-#         write_grads=False,
-#         write_images=False)
-   
-#     # Use Keras to train the model.
-#     history = model.fit(x=data.train.images,
-#                         y=data.train.labels,
-#                         epochs=3,
-#                         batch_size=128,
-#                         validation_data=validation_data,
-#                         callbacks=[callback_log])
-
-#     # Get the classification accuracy on the validation-set
-#     # after the last training-epoch.
-#     accuracy = history.history['val_acc'][-1]
-
-#     # Print the classification accuracy.
-#     print()
-#     print("Accuracy: {0:.2%}".format(accuracy))
-#     print()
-
-#     # Save the model if it improves on the best-found performance.
-#     # We use the global keyword so we update the variable outside
-#     # of this function.
-#     global best_accuracy
-
-#     # If the classification accuracy of the saved model is improved ...
-#     if accuracy > best_accuracy:
-#         # Save the new model to harddisk.
-#         model.save(path_best_model)
-        
-#         # Update the classification accuracy.
-#         best_accuracy = accuracy
-
-#     # Delete the Keras model with these hyper-parameters from memory.
-#     del model
-    
-#     # Clear the Keras session, otherwise it will keep adding new
-#     # models to the same TensorFlow graph each time we create
-#     # a model with a different set of hyper-parameters.
-#     K.clear_session()
-    
-#     # NOTE: Scikit-optimize does minimization so it tries to
-#     # find a set of hyper-parameters with the LOWEST fitness-value.
-#     # Because we are interested in the HIGHEST classification
-#     # accuracy, we need to negate this number so it can be minimized.
-#     return -accuracy
-
-# Plot the images and labels using our helper-function above.
-# plot_images(images=images, cls_true=cls_true)
-
 # test run
-# fitness(x=default_parameters)
+# _fitness(x=default_parameters)
 
 # run model
 search_result = gp_minimize(func=_fitness,
