@@ -53,8 +53,9 @@ def extract_sift_kmeans_feature_vectors(images_gray):
     return image_sift_desc
 
   image_sifts = [to_sift_desc(image) for image in images_gray]
-  cluster_vectors = compute_kmeans_cluster_vectors(image_sifts)
-  return cluster_vectors
+  # cluster_vectors = compute_kmeans_cluster_vectors(image_sifts)
+  # return cluster_vectors
+  return image_sifts
 
 def extract_orb_kmeans_feature_vectors(images_gray):
   print('Extracting ORB features...')
@@ -67,16 +68,17 @@ def extract_orb_kmeans_feature_vectors(images_gray):
     return image_orb_desc
 
   image_orbs = [to_orb_desc(image) for image in images_gray]
-  cluster_vectors = compute_kmeans_cluster_vectors(image_orbs)
-  return cluster_vectors
+  # cluster_vectors = compute_kmeans_cluster_vectors(image_orbs)
+  # return cluster_vectors
+  return image_orbs
 
 def compute_kmeans_cluster_vectors(image_keypoint_lists):
   flattened_image_keypoints = [point for image_keypoints in image_keypoint_lists for point in image_keypoints]
   
-  num_clusters = KMEANS_CLUSTERS
-  if IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS:
-    num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
-
+  # num_clusters = KMEANS_CLUSTERS
+  # if IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS:
+  #   num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
+  num_clusters = len(image_keypoint_lists)
   print('Computing KMeans clusters with n_clusters=' + str(num_clusters) + '...')
   kmeans = KMeans(n_clusters=num_clusters)
   kmeans.fit(flattened_image_keypoints)
@@ -92,4 +94,4 @@ def compute_kmeans_cluster_vectors(image_keypoint_lists):
   
     cluster_vectors.append(cluster_vector)
   
-  return cluster_vectors
+  return cluster_vectors, kmeans

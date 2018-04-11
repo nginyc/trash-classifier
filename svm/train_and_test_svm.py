@@ -4,6 +4,7 @@ import matplotlib
 import os
 
 from .visualize_features import visualize_features
+from .train_svm_kmeans import compute_kmeans_cluster_vectors, IF_BINARY_FEATURES
 
 '''
     SETTINGS (can be configured with environment variables)
@@ -21,34 +22,64 @@ def train_and_test_svm(X, y):
     print('Training & testing model...')
     X = np.array(X)
     y = np.array(y)
-    
+
     kf = model_selection.KFold(
         n_splits=KFOLD_SPLITS, random_state=KFOLD_RANDOM_STATE, shuffle=True
     )
-
+    split_index = int(len(X) * 0.70)
     y_test_predict_comb = []
     y_test_comb = []
     y_train_predict_comb = []
     y_train_comb = []
-    for (i, (train_indices, test_indices)) in enumerate(kf.split(X)):
-        X_train = X[train_indices]
-        y_train = y[train_indices]
-        X_test = X[test_indices]
-        y_test = y[test_indices]
-        print('Training model for fold ' + str(i) + '...')
-        model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM)
-        model.fit(X_train, y_train)
-        print('Testing model for fold ' + str(i) + '...')
-        y_train_predict = np.array(model.predict(X_train))
-        y_test_predict = np.array(model.predict(X_test))
-        (train_accuracy, _) = get_accuracy(y_train_predict, y_train)
-        (test_accuracy, _) = get_accuracy(y_test_predict, y_test)
-        print('Train accuracy: ' + str(train_accuracy))
-        print('Test accuracy: ' + str(test_accuracy))
-        y_train_predict_comb = np.concatenate((y_train_predict_comb, y_train_predict))
-        y_train_comb = np.concatenate((y_train_comb, y_train))
-        y_test_predict_comb = np.concatenate((y_test_predict_comb, y_test_predict))
-        y_test_comb = np.concatenate((y_test_comb, y_test))
+    X_train = X[:split_index]
+    y_train = y[:split_index]
+    X_test = X[split_index:]
+    y_test = y[split_index:]
+    cluster_vectors_train, kmeans = compute_kmeans_cluster_vectors(X_train)
+    cluster_vectors_test = []
+    for image_keypoints in X_test:
+        clusters = np.array(kmeans.predict(image_keypoints) if len(image_keypoints) > 0 else [])
+
+        # Get cluster number histogram as feature vector
+        cluster_vector = [(clusters == i).sum() for i in range(0, num_clusters)]
+        if IF_BINARY_FEATURES:
+            cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
+
+        cluster_vectors_test.append(cluster_vector)
+
+    print('Training model for fold 1' + '...')
+    model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM, gamma=0.5)
+    model.fit(cluster_vectors_train, y_train)
+    print('Testing model for fold 1' + '...')
+    y_train_predict = np.array(model.predict(cluster_vectors_train))
+    y_test_predict = np.array(model.predict(cluster_vectors_test))
+    (train_accuracy, _) = get_accuracy(y_train_predict, y_train)
+    (test_accuracy, _) = get_accuracy(y_test_predict, y_test)
+    print('Train accuracy: ' + str(train_accuracy))
+    print('Test accuracy: ' + str(test_accuracy))
+    y_train_predict_comb = np.concatenate((y_train_predict_comb, y_train_predict))
+    y_train_comb = np.concatenate((y_train_comb, y_train))
+    y_test_predict_comb = np.concatenate((y_test_predict_comb, y_test_predict))
+    y_test_comb = np.concatenate((y_test_comb, y_test))
+    # for (i, (train_indices, test_indices)) in enumerate(kf.split(X)):
+    #     X_train = X[train_indices]
+    #     y_train = y[train_indices]
+    #     X_test = X[test_indices]
+    #     y_test = y[test_indices]
+    #     print('Training model for fold ' + str(i) + '...')
+    #     model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM, gamma=0.5)
+    #     model.fit(X_train, y_train)
+    #     print('Testing model for fold ' + str(i) + '...')
+    #     y_train_predict = np.array(model.predict(X_train))
+    #     y_test_predict = np.array(model.predict(X_test))
+    #     (train_accuracy, _) = get_accuracy(y_train_predict, y_train)
+    #     (test_accuracy, _) = get_accuracy(y_test_predict, y_test)
+    #     print('Train accuracy: ' + str(train_accuracy))
+    #     print('Test accuracy: ' + str(test_accuracy))
+    #     y_train_predict_comb = np.concatenate((y_train_predict_comb, y_train_predict))
+    #     y_train_comb = np.concatenate((y_train_comb, y_train))
+    #     y_test_predict_comb = np.concatenate((y_test_predict_comb, y_test_predict))
+    #     y_test_comb = np.concatenate((y_test_comb, y_test))
 
     (train_accuracy_comb, train_confusion_matrix_comb) = get_accuracy(y_train_predict_comb, y_train_comb)
     (test_accuracy_comb, test_confusion_matrix_comb) = get_accuracy(y_test_predict_comb, y_test_comb)
@@ -61,6 +92,6 @@ def train_and_test_svm(X, y):
     print(test_confusion_matrix_comb)
 
 def get_accuracy(y_predict, y):
-    accuracy = np.sum(y_predict == y) / y.size
+    accuracy = np.sum(y_predict == y).__float__() / float(y.size)
     confusion_matrix = metrics.confusion_matrix(y_predict, y)
     return (accuracy, confusion_matrix)

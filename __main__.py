@@ -1,8 +1,8 @@
 import sys
 
-from svm import train_svm_raw_pixels, train_svm_inception_bottleneck, \
-    train_svm_sift_kmeans, train_svm_orb_kmeans, train_svm_colour_orb_kmeans, \
+from svm import train_svm_sift_kmeans, train_svm_orb_kmeans, train_svm_colour_orb_kmeans, \
     train_svm_colour_sift_kmeans
+    # train_svm_raw_pixels, train_svm_inception_bottleneck
 
 '''
     Usage: . <training_mode>
@@ -16,8 +16,8 @@ if __name__ == '__main__':
 
     training_mode = sys.argv[1]
     ({
-        'svm_raw_pixels': train_svm_raw_pixels,
-        'svm_inception_bottleneck': train_svm_inception_bottleneck,
+        # 'svm_raw_pixels': train_svm_raw_pixels,
+        # 'svm_inception_bottleneck': train_svm_inception_bottleneck,
         'svm_sift_kmeans': train_svm_sift_kmeans,
         'svm_orb_kmeans': train_svm_orb_kmeans,
         'svm_colour_orb_kmeans': train_svm_colour_orb_kmeans,
