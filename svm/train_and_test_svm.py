@@ -25,15 +25,17 @@ def train_and_test_svm(X, y):
     kf = model_selection.KFold(
         n_splits=KFOLD_SPLITS, random_state=KFOLD_RANDOM_STATE, shuffle=True
     )
-    split_index = int(len(X) * 0.70)
+    # split_index = int(len(X) * 0.70)
+    train_index = np.random.choice(len(X), size=int(len(X) * 0.7), replace=False)
+
     y_test_predict_comb = []
     y_test_comb = []
     y_train_predict_comb = []
     y_train_comb = []
-    X_train = X[:split_index]
-    y_train = y[:split_index]
-    X_test = X[split_index:]
-    y_test = y[split_index:]
+    X_train = X[train_index]
+    y_train = y[train_index]
+    X_test = np.delete(X, train_index)
+    y_test = np.delete(y, train_index)
     cluster_vectors_train, kmeans = compute_kmeans_cluster_vectors(X_train)
     cluster_vectors_test = []
     for image_keypoints in X_test:
