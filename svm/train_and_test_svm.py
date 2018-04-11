@@ -2,13 +2,12 @@ import numpy as np
 from sklearn import svm, model_selection, metrics
 import matplotlib
 import os
-
-from .visualize_features import visualize_features
-from .train_svm_kmeans import compute_kmeans_cluster_vectors, IF_BINARY_FEATURES
+from sklearn.cluster import KMeans
 
 '''
     SETTINGS (can be configured with environment variables)
 '''
+IF_BINARY_FEATURES = bool(os.environ.get('IF_BINARY_FEATURES', False))
 SVM_C_PARAM = float(os.environ.get('SVM_C_PARAM', 1))
 MAX_ITERATIONS = int(os.environ.get('MAX_ITERATIONS', 10000))
 KFOLD_SPLITS = int(os.environ.get('KFOLD_SPLITS', 5))
@@ -41,6 +40,7 @@ def train_and_test_svm(X, y):
         clusters = np.array(kmeans.predict(image_keypoints) if len(image_keypoints) > 0 else [])
 
         # Get cluster number histogram as feature vector
+        num_clusters = len(X_train)
         cluster_vector = [(clusters == i).sum() for i in range(0, num_clusters)]
         if IF_BINARY_FEATURES:
             cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
@@ -95,3 +95,29 @@ def get_accuracy(y_predict, y):
     accuracy = np.sum(y_predict == y).__float__() / float(y.size)
     confusion_matrix = metrics.confusion_matrix(y_predict, y)
     return (accuracy, confusion_matrix)
+
+
+def compute_kmeans_cluster_vectors(image_keypoint_lists):
+    flattened_image_keypoints = [point for image_keypoints in image_keypoint_lists for point in image_keypoints]
+
+    # num_clusters = KMEANS_CLUSTERS
+    # if IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS:
+    #   num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
+    num_clusters = len(image_keypoint_lists)
+    print('Computing KMeans clusters with n_clusters=' + str(num_clusters) + '...')
+    kmeans = KMeans(n_clusters=num_clusters)
+    kmeans.fit(flattened_image_keypoints)
+
+    cluster_vectors = []
+    for image_keypoints in image_keypoint_lists:
+        clusters = np.array(kmeans.predict(image_keypoints) if len(image_keypoints) > 0 else [])
+
+        # Get cluster number histogram as feature vector
+        cluster_vector = [(clusters == i).sum() for i in range(0, num_clusters)]
+        if IF_BINARY_FEATURES:
+            print("Using Binary Features")
+            cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
+
+        cluster_vectors.append(cluster_vector)
+
+    return cluster_vectors, kmeans
