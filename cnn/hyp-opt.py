@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 import math
 
-# from tf.keras.models import Sequential  # This does not work!
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import InputLayer, Input
@@ -28,6 +27,8 @@ from tfrecord_to_dataset import generate_input_fn
 from cnn_architecture import *
 import shutil
 
+params = alexnet_params
+
 path_best_model = '19_best_model.keras'
 best_accuracy = 0.0
 
@@ -36,13 +37,13 @@ best_accuracy = 0.0
 dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform',
                          name='learning_rate')
 
-# search dimension for number of dense layers
-# return int n layers
-# dim_num_dense_layers = Integer(low=1, high=5, name='num_dense_layers')
+# search dimension for batch size
+# return int n batch size
+dim_batch_size = Integer(low=1, high=10, name='batch_size')
 
-# search dimension for number of nodes for each dense layer
-# return int n nodes
-# dim_num_dense_nodes = Integer(low=5, high=512, name='num_dense_nodes')
+# search dimension for train steps
+# return int n train steps
+dim_train_steps = Integer(low=1, high=20, name='train_steps')
 
 # search dimension for activation function
 # return relu or sigmoid
@@ -122,7 +123,6 @@ def plot_example_errors(cls_pred):
 
 @use_named_args(dimensions=dimensions)
 def _fitness(learning_rate):
-    params = alexnet_params
     params['learning_rate'] = learning_rate
 
     # from main in cnn_classifier
@@ -138,6 +138,7 @@ def _fitness(learning_rate):
         log_step_count_steps=params['log_step_count_steps']
     )
     
+    # checkpoint false means delete the existing
     if not params['use_checkpoint']:
         print("Removing previous artifacts...")
         shutil.rmtree(model_directory, ignore_errors=True)
@@ -153,9 +154,34 @@ def _fitness(learning_rate):
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
 
-    # skopt finds minimum, so we invert the accuracy
-    return -eval_results['accuracy']
+    accuracy = -eval_results['accuracy']
 
+    # Print the classification accuracy.
+    print()
+    print("Accuracy: {0:.2%}".format(accuracy))
+    print()
+
+    # Save the model if it improves on the best-found performance.
+    # We use the global keyword so we update the variable outside
+    # of this function.
+    global best_accuracy
+
+    # If the classification accuracy of the saved model is improved ...
+    if accuracy > best_accuracy:
+        # Save the new model
+        params['save_checkpoints_steps'] = True
+        
+        # Update the classification accuracy.
+        best_accuracy = accuracy
+
+    # Delete the Keras model with these hyper-parameters from memory.
+    del estimator
+        
+    # NOTE: Scikit-optimize does minimization so it tries to
+    # find a set of hyper-parameters with the LOWEST fitness-value.
+    # Because we are interested in the HIGHEST classification
+    # accuracy, we need to negate this number so it can be minimized.
+    return -accuracy
 
 # test run
 # _fitness(x=default_parameters)
@@ -164,11 +190,12 @@ def _fitness(learning_rate):
 search_result = gp_minimize(func=_fitness,
                             dimensions=dimensions,
                             acq_func='EI', # Expected Improvement.
-                            n_calls=40,
+                            n_calls=11,
                             x0=default_parameters)
 
-print(search_result.x)
+print("SEARCH RESULT: ", search_result.x)
 space = search_result.space
 print(space.point_to_dict(search_result.x))
 print(search_result.fun)
 plot_convergence(search_result)
+print(sorted(zip(search_result.func_vals, search_result.x_iters)))
