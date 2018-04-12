@@ -13,6 +13,7 @@ MAX_ITERATIONS = int(os.environ.get('MAX_ITERATIONS', 10000))
 KFOLD_SPLITS = int(os.environ.get('KFOLD_SPLITS', 5))
 KFOLD_RANDOM_STATE = int(os.environ.get('KFOLD_RANDOM_STATE', 666))
 IF_VISUALIZE_FEATURES = bool(os.environ.get('IF_VISUALIZE_FEATURES', False))
+IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS = bool(os.environ.get('IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS', False))
 
 def train_and_test_svm(X, y):
     if IF_VISUALIZE_FEATURES:
@@ -42,7 +43,8 @@ def train_and_test_svm(X, y):
         clusters = np.array(kmeans.predict(image_keypoints) if len(image_keypoints) > 0 else [])
 
         # Get cluster number histogram as feature vector
-        num_clusters = len(X_train)
+        #num_clusters = len(X_train)
+        num_clusters = kmeans.cluster_centers_.shape[0]
         cluster_vector = [(clusters == i).sum() for i in range(0, num_clusters)]
         if IF_BINARY_FEATURES:
             cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
@@ -103,9 +105,9 @@ def compute_kmeans_cluster_vectors(image_keypoint_lists):
     flattened_image_keypoints = [point for image_keypoints in image_keypoint_lists for point in image_keypoints]
 
     # num_clusters = KMEANS_CLUSTERS
-    # if IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS:
-    #   num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
     num_clusters = len(image_keypoint_lists)
+    if IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS:
+      num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
     print('Computing KMeans clusters with n_clusters=' + str(num_clusters) + '...')
     # n_jobs=-2 makes it runn all all cores except 1. As compated to when it was 1 and ran sequentially :(
     kmeans = KMeans(n_clusters=num_clusters, n_jobs=-2)
