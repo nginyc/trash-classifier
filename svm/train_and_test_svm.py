@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import svm, model_selection, metrics
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import matplotlib
 import os
 from sklearn.cluster import KMeans
@@ -14,6 +15,7 @@ KFOLD_SPLITS = int(os.environ.get('KFOLD_SPLITS', 5))
 KFOLD_RANDOM_STATE = int(os.environ.get('KFOLD_RANDOM_STATE', 666))
 IF_VISUALIZE_FEATURES = bool(os.environ.get('IF_VISUALIZE_FEATURES', False))
 IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS = bool(os.environ.get('IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS', False))
+KMEANS_CLUSTERS = int(os.environ.get('KMEANS_CLUSTERS', -1))
 
 def train_and_test_svm(X, y):
     if IF_VISUALIZE_FEATURES:
@@ -37,7 +39,7 @@ def train_and_test_svm(X, y):
     y_train = y[train_index]
     X_test = np.delete(X, train_index)
     y_test = np.delete(y, train_index)
-    cluster_vectors_train, kmeans = compute_kmeans_cluster_vectors(X_train)
+    cluster_vectors_train, kmeans ,scalar = compute_kmeans_cluster_vectors(X_train)
     cluster_vectors_test = []
     for image_keypoints in X_test:
         clusters = np.array(kmeans.predict(image_keypoints) if len(image_keypoints) > 0 else [])
@@ -50,7 +52,7 @@ def train_and_test_svm(X, y):
             cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
 
         cluster_vectors_test.append(cluster_vector)
-
+    cluster_vectors_test = scalar.transform(cluster_vectors_test)
     print('Training model for fold 1' + '...')
     model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM, gamma=0.5)
     model.fit(cluster_vectors_train, y_train)
@@ -105,12 +107,16 @@ def compute_kmeans_cluster_vectors(image_keypoint_lists):
     flattened_image_keypoints = [point for image_keypoints in image_keypoint_lists for point in image_keypoints]
 
     # num_clusters = KMEANS_CLUSTERS
-    num_clusters = len(image_keypoint_lists)
+    # Clusters = average number of keypoints -- Trial
+    num_clusters = int( len(flattened_image_keypoints)/float(len(image_keypoint_lists)))
+    # num_clusters = len(image_keypoint_lists)
     if IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS:
       num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
+    if (KMEANS_CLUSTERS != -1):
+        num_clusters = KMEANS_CLUSTERS
     print('Computing KMeans clusters with n_clusters=' + str(num_clusters) + '...')
     # n_jobs=-2 makes it runn all all cores except 1. As compated to when it was 1 and ran sequentially :(
-    kmeans = KMeans(n_clusters=num_clusters, n_jobs=-2)
+    kmeans = KMeans(n_clusters=num_clusters, n_jobs=4)
     kmeans.fit(flattened_image_keypoints)
 
     cluster_vectors = []
@@ -124,5 +130,8 @@ def compute_kmeans_cluster_vectors(image_keypoint_lists):
             cluster_vector = [1 if x > 0 else 0 for x in cluster_vector]
 
         cluster_vectors.append(cluster_vector)
-
-    return cluster_vectors, kmeans
+    # standard_scalar = StandardScaler().fit(cluster_vectors)
+    # cluster_vectors = standard_scalar.transform(cluster_vectors)
+    minMax_scalar = MinMaxScaler().fit(cluster_vectors)
+    cluster_vectors = minMax_scalar.transform(cluster_vectors)
+    return cluster_vectors, kmeans , minMax_scalar
