@@ -2,61 +2,81 @@ import numpy as np
 import sys
 import cv2
 import os
-import tensorflow as tf
-import tensorflow_hub as hub
+from sklearn import svm, metrics, model_selection
 
-from .train_and_test_svm import train_and_test_svm
 from common import load_images
+from .extract_inception_bottleneck_features import extract_inception_bottleneck_features
+from .extract_sift_features import extract_sift_features
+from .extract_orb_features import extract_orb_features
+from .extract_rgb_sift_features import extract_rgb_sift_features
+from .extract_rgb_gray_sift_features import extract_rgb_gray_sift_features
 
 '''
     SETTINGS (can be configured with environment variables)
 '''
-BATCH_SIZE = int(os.environ.get('BATCH_SIZE', 100))
-TFHUB_INCEPTION_V3_MODULE_SPEC_URL = os.environ.get('TFHUB_INCEPTION_V3_MODULE_SPEC_URL', 
-    'https://tfhub.dev/google/imagenet/inception_v3/feature_vector/1')
+SVM_C_PARAM = float(os.environ.get('SVM_C_PARAM', 1))
+SVM_GAMMA_PARAM = float(os.environ.get('SVM_GAMMA_PARAM', 0))
+MAX_ITERATIONS = int(os.environ.get('MAX_ITERATIONS', 10000))
+IF_VISUALIZE_FEATURES = bool(os.environ.get('IF_VISUALIZE_FEATURES', False))
+TEST_SET_RATIO = float(os.environ.get('TEST_SET_RATIO', 0.3))
 
-def extract_raw_pixels_feature_vectors(images):
-    print('Extracting raw pixels as feature vectors...')
-    X = [image.flatten() for image in images]
-    return X
+'''
+    Trains and tests an SVM given a method that extracts features from images
+'''
+def train(extract_features, if_grayscale=False):
+    # Load images
+    (images, labels) = load_images(if_grayscale=if_grayscale)
 
-def extract_inception_bottleneck_feature_vectors(images):
-    print('Downloading Inception V3 Tensorflow Hub model spec...')
-    module_spec = hub.load_module_spec(TFHUB_INCEPTION_V3_MODULE_SPEC_URL)
-    print('Extracting inception bottleneck feature vectors...')
-    module = hub.Module(module_spec)
-    (image_height, image_width) = hub.get_expected_image_size(module)
-    images = [tf.image.convert_image_dtype(x, tf.float32) for x in images]
-    images = [tf.image.resize_images(x, (image_height, image_width)) for x in images]
-    sess = tf.Session()
-    m = hub.Module(module_spec)
-    X = []
-    sess.run(tf.global_variables_initializer())
-    batches = [images[i:i + BATCH_SIZE] for i in range(0, len(images), BATCH_SIZE)]
-    for batch in batches:
-        bottleneck_tensors = m(batch)
-        x_batch = sess.run(bottleneck_tensors)
-        X.extend(x_batch)
-    return X
+    # Split images into train and test set
+    test_set_ratio = TEST_SET_RATIO
+    print('Splitting dataset to train & test set with test_set_ratio=' + str(test_set_ratio) + '...')
+    (images_train, images_test, labels_train, labels_test) = \
+        model_selection.train_test_split(images, labels, test_size=test_set_ratio)
 
-def train_svm_raw_pixels():
-    (images, image_labels) = load_images()
-    X = extract_raw_pixels_feature_vectors(images)
-    y = image_labels
-    train_and_test_svm(X, y)
+    # Extract features from images
+    print('Extracting features for train & test set...')
+    (X_train, X_test) = extract_features(images_train, images_test)
+    y_train = labels_train
+    y_test = labels_test
+
+    # Visualize features
+    if IF_VISUALIZE_FEATURES:
+        from .visualize_features import visualize_features
+        visualize_features(X_train, y_train)
+
+    # Train SVM model with train set
+    gamma = SVM_GAMMA_PARAM if SVM_GAMMA_PARAM != 0 else 'auto'
+    model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM, gamma=gamma)
+    model.fit(X_train, y_train)
+
+    # Test SVM model
+    y_train_predict = np.array(model.predict(X_train))
+    y_test_predict = np.array(model.predict(X_test))
+    (train_accuracy, train_confusion_matrix) = get_accuracy(y_train_predict, y_train)
+    (test_accuracy, test_confusion_matrix) = get_accuracy(y_test_predict, y_test)
+    print('Train accuracy: ' + str(train_accuracy))
+    print('Train confusion matrix:')
+    print(train_confusion_matrix)
+    print('Test accuracy: ' + str(test_accuracy))
+    print('Test confusion matrix:')
+    print(test_confusion_matrix)
+    
+def get_accuracy(y_predict, y):
+    accuracy = np.sum(y_predict == y).__float__() / float(len(y))
+    confusion_matrix = metrics.confusion_matrix(y_predict, y)
+    return (accuracy, confusion_matrix)
 
 def train_svm_inception_bottleneck():
-    # Potential upgrades
-    # TODO: distortions, cropping, brightening the images to generate more data: \
-    #   https://www.tensorflow.org/tutorials/image_retraining#bottlenecks
-    # TODO: Try another SVM kernel e.g. RBF or other SVM settings: \ 
-    #   https://code.oursky.com/tensorflow-svm-image-classifications-engine/
-    # TODO: Find more training data?
-    # TODO: Find more material types?
-    # TODO: Explore misclassifications and in-depth about how bottleneck features work \
-    #   (and whether other features might be better in other ways?)
-    (images, image_labels) = load_images()
-    X = extract_inception_bottleneck_feature_vectors(images)
-    y = image_labels
-    train_and_test_svm(X, y)
+    train(extract_inception_bottleneck_features)
 
+def train_svm_sift_kmeans():
+    train(extract_sift_features, if_grayscale=True)
+
+def train_svm_orb_kmeans():
+    train(extract_orb_features, if_grayscale=True)
+
+def train_svm_rgb_sift_kmeans():
+    train(extract_rgb_sift_features)
+
+def train_svm_rgb_gray_sift_kmeans():
+    train(extract_rgb_gray_sift_features)

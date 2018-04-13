@@ -54,6 +54,83 @@ Combined confusion matrix:
  [ 5  9 10  8 20]]
  ```
 
+(4) Removed binary features, add normalization
+
+```
+SVM_C_PARAM=1
+IMAGE_COUNT_PER_CLASS=100
+IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS=True
+IF_NORMALIZE_IMAGES=True
+```
+```
+Combined train accuracy: 0.927
+Combined train confusion matrix:
+[[360   4   0   7   5]
+ [ 40 390  14  23  46]
+ [  0   3 386   0   0]
+ [  0   0   0 369   0]
+ [  0   3   0   1 349]]
+Combined test accuracy: 0.446
+Combined test confusion matrix:
+[[38  7  2  6  5]
+ [23 46 18 19 25]
+ [ 4 11 34  1  8]
+ [32 20 39 71 28]
+ [ 3 16  7  3 34]]
+ ```
+
+(5) Added binary features
+
+```
+SVM_C_PARAM=1
+IMAGE_COUNT_PER_CLASS=50
+IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS=True
+IF_NORMALIZE_IMAGES=True
+IF_BINARY_FEATURES=True
+```
+```
+Combined train accuracy: 0.561
+Combined train confusion matrix:
+[[119  29  22  47  19]
+ [ 44 128  45  32  20]
+ [  3   3  55   2   0]
+ [ 12   9  31 108  10]
+ [ 22  31  47  11 151]]
+Combined test accuracy: 0.288
+Combined test confusion matrix:
+[[14 18  7 11  5]
+ [22 14 18 16 11]
+ [ 1  3  2  0  2]
+ [ 6  2  9 16  6]
+ [ 7 13 14  7 26]]
+ ```
+
+(6) 
+
+```
+SVM_C_PARAM=1
+IMAGE_COUNT_PER_CLASS=100
+IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS=True
+IF_NORMALIZE_IMAGES=True
+IF_BINARY_FEATURES=True
+```
+```
+Combined train accuracy: 0.653
+Combined train confusion matrix:
+[[335  93  84 118  77]
+ [  8 251  36  15  15]
+ [  7  10 194   1   7]
+ [ 27  14  40 247  22]
+ [ 23  32  46  19 279]]
+Combined test accuracy: 0.4
+Combined test confusion matrix:
+[[68 39 24 36 24]
+ [ 9 27 25  6  7]
+ [ 2  4 12  4 10]
+ [14  9 18 45 11]
+ [ 7 21 21  9 48]]
+ ```
+
 ## Settings & Results for ORB features + KMeans
 
 Run with `python . svm_orb_kmeans`.
@@ -187,6 +264,32 @@ Combined test confusion matrix:
  [ 2  9  8  5 15]]
  ```
 
+(5) Normalized images
+
+```
+IMAGE_COUNT_PER_CLASS=100
+SVM_C_PARAM=1
+IF_NORMALIZE_IMAGES=True
+IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS=True
+IF_BINARY_FEATURES=True
+```
+```
+Combined train accuracy: 0.6655
+Combined train confusion matrix:
+[[258  52  22  42  53]
+ [  8 214   9   2  10]
+ [ 38  66 305  38  43]
+ [ 80  24  33 298  38]
+ [ 16  44  31  20 256]]
+Combined test accuracy: 0.372
+Combined test confusion matrix:
+[[40 24 10 16 16]
+ [ 8 22  9  6  7]
+ [11 27 44 18 33]
+ [33  9 14 52 16]
+ [ 8 18 23  8 28]]
+ ```
+
 ## Settings & Results for RGB-ORB features + KMeans
 
 Run with `python . svm_colour_orb_kmeans`.
@@ -317,8 +420,8 @@ Run with `python . svm_colour_sift_kmeans`.
 (1) 
 
 ```
-SVM_C_PARAM=10 
-IMAGE_COUNT_PER_CLASS=50 
+SVM_C_PARAM=10
+IMAGE_COUNT_PER_CLASS=50
 IF_SQRT_KEYPOINTS_KMEANS_CLUSTERS=True
 IF_BINARY_FEATURES=True
 ```

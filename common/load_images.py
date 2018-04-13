@@ -6,6 +6,7 @@ import numpy as np
 '''
     SETTINGS (can be configured with environment variables)
 '''
+IF_NORMALIZE_IMAGES = bool(os.environ.get('IF_NORMALIZE_IMAGES', False))
 IMAGE_COUNT_PER_CLASS = int(os.environ.get('IMAGE_COUNT_PER_CLASS', 0))
 DATASET_PATH = os.environ.get('DATASET_PATH', 
     os.path.dirname(__file__) + '/../data/garythung-trashnet')
@@ -59,6 +60,9 @@ def load_images(if_grayscale=False):
                 image_path,
                 cv2.IMREAD_GRAYSCALE if if_grayscale else cv2.IMREAD_COLOR,
             )
+            if IF_NORMALIZE_IMAGES:
+                image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
+
             images.append(image)
             image_labels.append(i)
 

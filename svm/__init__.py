@@ -1,2 +1,2 @@
-# from .svm_classifiers import train_svm_inception_bottleneck, train_svm_raw_pixels
-from .train_svm_kmeans import train_svm_sift_kmeans, train_svm_orb_kmeans, train_svm_colour_orb_kmeans, train_svm_colour_sift_kmeans
+from .svm_classifiers import train_svm_inception_bottleneck, train_svm_sift_kmeans, \
+  train_svm_orb_kmeans, train_svm_rgb_sift_kmeans, train_svm_rgb_gray_sift_kmeans
