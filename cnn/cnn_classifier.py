@@ -10,10 +10,10 @@ import shutil
 tf.logging.set_verbosity(tf.logging.INFO)
 
 alexnet_params = {
-    'batch_size': 2,
+    'batch_size': 10,
     'learning_rate': 0.002,
     'train_steps': 10,
-    'eval_steps': 1,
+    'eval_steps': 10,
     'num_classes': 6,
     'image_height': 256,
     'image_width': 256,
@@ -57,19 +57,21 @@ def get_feature_columns(params):
 def model_fn(features, labels, mode, params):                                                                                                                                                                         
     logits = params['architecture'](features, params, mode)
 
+    if mode in (tf.estimator.ModeKeys.PREDICT, tf.estimator.ModeKeys.EVAL):
+        predicted_indices = tf.argmax(input=logits, axis=1)
+        probabilities = tf.nn.softmax(logits, name='softmax_tensor')
+
     if mode in (tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL):
         global_step = tf.train.get_or_create_global_step()
-        label_indices = tf.argmax(input=logits, axis=1)
+        label_indices = tf.argmax(input=labels, axis=1)
         loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
         tf.summary.scalar('cross_entropy', loss)
 
-    predicted_indices = tf.argmax(input=logits, axis=1)
-    probabilities = tf.nn.softmax(logits, name='softmax_tensor')
-    predictions = {
-        'classes': predicted_indices,
-        'probabilities': probabilities
-    }
     if mode == tf.estimator.ModeKeys.PREDICT:
+        predictions = {
+            'classes': predicted_indices,
+            'probabilities': probabilities
+        }
         return tf.estimator.EstimatorSpec(mode, predictions=predictions)
     
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -114,12 +116,11 @@ def main(argv):
 
     estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
-    tensors_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
-
     train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
-    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
+    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[])
     
+    tensors_to_log = {"probabilities": "softmax_tensor"}
+    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=1)
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
     print("Evaluation Results: {}".format(eval_results))
