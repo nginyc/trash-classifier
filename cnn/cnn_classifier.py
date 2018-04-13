@@ -1,99 +1,128 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
-import numpy as np
+from tfrecord_to_dataset import generate_input_fn
+from cnn_architecture import *
 import tensorflow as tf
-from cnn_networks import *
-from tfrecords_to_dataset import *
+import numpy as np
+import sys
+import os
+import getopt
+import shutil
 
-tf.logging.set_verbosity(tf.logging.DEBUG)
+tf.logging.set_verbosity(tf.logging.INFO)
 
-CNN_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-TRAIN_PATH = os.path.join(CNN_DIRECTORY, "..", "data", "tfrecords", "train.tfrecords")
-TEST_PATH = os.path.join(CNN_DIRECTORY, "..", "data", "tfrecords", "test.tfrecords")
-ALEXNET_MODEL_PATH = os.path.join(CNN_DIRECTORY, "..", "model", "alexnet")
+alexnet_params = {
+    'batch_size': 2,
+    'learning_rate': 0.002,
+    'train_steps': 10,
+    'eval_steps': 1,
+    'num_classes': 6,
+    'image_height': 256,
+    'image_width': 256,
+    'image_channels': 3,
+    'architecture': alexnet_architecture,
+    'save_checkpoints_steps': 100,
+    'use_checkpoint': False,
+    'log_step_count_steps': 1,
+    'tf_random_seed': 20170409,
+    'model_name': 'alexnet_model'
+}
 
-def alexnet_model_fn(features, labels, mode, params):
-    inputs = features["image_data"]
-    logits = alexnet_layers_fn(inputs, mode)
+zfnet_params = {
+    'batch_size': 2,
+    'learning_rate': 0.002,
+    'train_steps': 10,
+    'eval_steps': 1,
+    'num_classes': 6,
+    'image_height': 256,
+    'image_width': 256,
+    'image_channels': 3,
+    'architecture': zfnet_layers_fn,
+    'save_checkpoints_steps': 100,
+    'use_checkpoint': False,
+    'log_step_count_steps': 1,
+    'tf_random_seed': 20170409,
+    'model_name': 'zfnet_model'
+}
 
+architecture = {
+    'alexnet': alexnet_params,
+    'zfnet': zfnet_params
+}
+
+def get_feature_columns(params):
+    feature_columns = {
+        'images': tf.feature_column.numeric_column('images', (params['image_height'], params['image_width'], params['image_channels']))
+    }
+    return feature_columns
+
+def model_fn(features, labels, mode, params):                                                                                                                                                                         
+    logits = params['architecture'](features, params, mode)
+
+    if mode in (tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL):
+        global_step = tf.train.get_or_create_global_step()
+        label_indices = tf.argmax(input=logits, axis=1)
+        loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+        tf.summary.scalar('cross_entropy', loss)
+
+    predicted_indices = tf.argmax(input=logits, axis=1)
+    probabilities = tf.nn.softmax(logits, name='softmax_tensor')
     predictions = {
-      # Generate predictions (for PREDICT and EVAL mode)
-      "classes": tf.argmax(input=logits, axis=1),
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-      # `logging_hook`.
-      "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+        'classes': predicted_indices,
+        'probabilities': probabilities
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-    # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-
-    # Configure the Training Op (for TRAIN mode)
+        return tf.estimator.EstimatorSpec(mode, predictions=predictions)
+    
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=params.learning_rate)
-        train_op = optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step())
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+        optimizer = tf.train.AdamOptimizer(learning_rate=params['learning_rate'])
+        train_op = optimizer.minimize(loss, global_step=global_step)
+        return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
 
-    # Add evaluation metrics (for EVAL mode)
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(
-            labels=labels, predictions=predictions["classes"])}
-    return tf.estimator.EstimatorSpec(
-        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    if mode == tf.estimator.ModeKeys.EVAL:
+        eval_metric_ops = {
+            'accuracy': tf.metrics.accuracy(label_indices, predicted_indices)
+        }
+        return tf.estimator.EstimatorSpec(mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
-def run_alexnet_experiment(argv=None):
-    """Run the training experiment."""
-    # Define model parameters
-    params = tf.contrib.training.HParams(
-        n_classes=6,
-        learning_rate=0.002,
-        train_steps=5000,
-        batch_size=8
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv[1:], "ha:", ["help=", "architecture="])
+        for opt, arg in opts:
+            if opt in ("-h", "--help"):
+                print("{} -a <architecture>".format(argv[0]))
+                sys.exit()
+            elif opt in ("-a", "--architecture"):
+                params = architecture[arg]
+    except getopt.GetoptError:
+        print("{} -a <architecture>".format(argv[0]))
+        sys.exit()
+
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    model_directory =  os.path.join(current_directory, "..", "model", params['model_name'])
+    train_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "train.tfrecords")]
+    test_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "test.tfrecords")]
+
+    run_config = tf.estimator.RunConfig(
+        save_checkpoints_steps=params['save_checkpoints_steps'],
+        tf_random_seed=params['tf_random_seed'],
+        model_dir=model_directory,
+        log_step_count_steps=params['log_step_count_steps']
     )
+    
+    if not params['use_checkpoint']:
+        print("Removing previous artifacts...")
+        shutil.rmtree(model_directory, ignore_errors=True)
 
-    # Set the run_config and the directory to save the model and stats
-    run_config = tf.contrib.learn.RunConfig()
-    run_config = run_config.replace(model_dir=ALEXNET_MODEL_PATH)
+    estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
-    tf.contrib.learn.learn_runner.run(
-        experiment_fn=experiment_fn,  # First-class function
-        run_config=run_config,  # RunConfig
-        schedule="train_and_evaluate",  # What to run
-        hparams=params  # HParams
-    )
+    tensors_to_log = {"probabilities": "softmax_tensor"}
+    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
 
-def experiment_fn(run_config, params):
-    estimator = get_estimator(run_config, params)
-    train_input_fn, train_input_hook = tfrecords_to_dataset(params.batch_size, TRAIN_PATH) 
-    eval_input_fn, eval_input_hook = tfrecords_to_dataset(params.batch_size, TEST_PATH)
-    experiment = tf.contrib.learn.Experiment(
-        estimator=estimator,  # Estimator
-        train_input_fn=train_input_fn,  # First-class function
-        eval_input_fn=eval_input_fn,  # First-class function
-        train_steps=params.train_steps,  # Minibatch steps
-        train_monitors=[train_input_hook],  # Hooks for training
-        eval_hooks=[eval_input_hook],  # Hooks for evaluation
-        eval_steps=None  # Use evaluation feeder until its empty
-    )
-    return experiment
+    train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
+    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
+    
+    test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
+    eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
+    print("Evaluation Results: {}".format(eval_results))
 
-def get_estimator(run_config, params):
-    """Return the model as a Tensorflow Estimator object.
-    Args:
-         run_config (RunConfig): Configuration for Estimator run.
-         params (HParams): hyperparameters.
-    """
-    return tf.estimator.Estimator(
-        model_fn=alexnet_model_fn,  # First-class function
-        params=params,  # HParams
-        config=run_config  # RunConfig
-    )
-
-if __name__ == "__main__":  
-    tf.app.run(main=run_alexnet_experiment)
+if __name__ == "__main__":
+    tf.app.run()

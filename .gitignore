@@ -4,5 +4,5 @@
 __pycache__/
 *.tfrecords
 *.pyc
-*.DS_Stor
 /model
+.DS_Store
