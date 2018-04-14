@@ -52,10 +52,10 @@ def compute_kmeans_bow_features(images_keypoints_train, images_keypoints_test):
 
 def predict_bow_features(kmeans, image_keypoints):
     num_clusters = kmeans.n_clusters
-    X = np.empty((len(image_keypoints), num_clusters))
+    X = []
     for (i, image_keypoints) in enumerate(image_keypoints):
         clusters = np.array(kmeans.predict(image_keypoints) if len(image_keypoints) > 0 else [])
         # Get cluster number histogram as feature vector
         cluster_vector = [(clusters == i).sum() for i in range(0, num_clusters)]
-        X[i] = cluster_vector
-    return X
+        X.append(cluster_vector)
+    return np.array(X)
