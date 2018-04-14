@@ -2,7 +2,7 @@ import os
 import numpy as np
 from sklearn import svm, model_selection, metrics, cluster, preprocessing
 
-KMEANS_CLUSTERS = os.environ.get('KMEANS_CLUSTERS', None) # int | "sqrt_keypoints" | "instances_count"
+KMEANS_CLUSTERS = os.environ.get('KMEANS_CLUSTERS', None) # int | "sqrt_keypoints" | "instances_count" | "average_keypoints"
 KMEANS_BOW_FEATURES_NORMALIZATION = os.environ.get('KMEANS_BOW_FEATURES_NORMALIZATION', None) # "binary" | "l1" | "minmax"
 KMEANS_JOBS = int(os.environ.get('KMEANS_JOBS', 4))
 
@@ -17,6 +17,8 @@ def compute_kmeans_bow_features(images_keypoints_train, images_keypoints_test):
         num_clusters = int(np.sqrt(len(flattened_image_keypoints)))
     elif KMEANS_CLUSTERS == 'instances_count':
         num_clusters = len(images_keypoints_train)
+    elif KMEANS_CLUSTERS == 'average_keypoints':
+        num_clusters = (len(flattened_image_keypoints) / len(images_keypoints_train))
     else:
         num_clusters = int(KMEANS_CLUSTERS)
     print('Computing KMeans clusters with n_clusters=' + str(num_clusters) + '...')
