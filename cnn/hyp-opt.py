@@ -50,24 +50,22 @@ dim_train_steps = Integer(low=1, high=20, name='train_steps')
 # dim_activation = Categorical(categories=['relu', 'sigmoid'],
 #                              name='activation')
 
-dimensions = [dim_learning_rate]
+dimensions = [dim_learning_rate, dim_batch_size, dim_train_steps]
 
-default_parameters = [0.002]
+default_parameters = [0.002, 2, 10]
 
 # logger for training progress
-def log_dir_name(learning_rate):
+def log_dir_name(learning_rate, batch_size, train_steps):
 # , num_dense_layers,
 #                  num_dense_nodes, activation):
 
     # The dir-name for the TensorBoard log-dir.
-    # s = "./19_logs/lr_{0:.0e}_layers_{1}_nodes_{2}_{3}/"
-    s = "./19_logs/lr_{0:.0e}/"
+    s = "./19_logs/lr_{0:.0e}_batch_{1}_steps_{2}/"
 
     # Insert all the hyper-parameters in the dir-name.
-    log_dir = s.format(learning_rate)
-                       # num_dense_layers,
-                       # num_dense_nodes,
-                       # activation)
+    log_dir = s.format(learning_rate,
+                        batch_size,
+                        train_steps)
 
     return log_dir
 
@@ -122,8 +120,10 @@ def plot_example_errors(cls_pred):
                 cls_pred=cls_pred[0:9])
 
 @use_named_args(dimensions=dimensions)
-def _fitness(learning_rate):
+def _fitness(learning_rate, batch_size, train_steps):
     params['learning_rate'] = learning_rate
+    params['batch_size'] = batch_size
+    params['train_steps'] = train_steps
 
     # from main in cnn_classifier
     current_directory = os.path.dirname(os.path.abspath(__file__))
