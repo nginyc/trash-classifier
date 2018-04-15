@@ -190,12 +190,22 @@ def _fitness(learning_rate, batch_size, train_steps):
 search_result = gp_minimize(func=_fitness,
                             dimensions=dimensions,
                             acq_func='EI', # Expected Improvement.
-                            n_calls=11,
+                            n_calls=20,
                             x0=default_parameters)
 
-print("SEARCH RESULT: ", search_result.x)
+# print results
+print("############RESULTS############")
 space = search_result.space
-print(space.point_to_dict(search_result.x))
-print(search_result.fun)
-plot_convergence(search_result)
+print("RESULTS: ", space.point_to_dict(search_result.x))
+print("Fitness value: ", search_result.fun)
+print("Nodes searched: ")
 print(sorted(zip(search_result.func_vals, search_result.x_iters)))
+print("##############################")
+
+# plot convergence
+plot_convergence(search_result)
+
+# plot dependence
+dim_names = ['learning_rate', 'batch_size', 'train_steps']
+fig, ax = plot_objective(result=search_result, dimension_names=dim_names)
+fig, ax = plot_evaluations(result=search_result, dimension_names=dim_names)
