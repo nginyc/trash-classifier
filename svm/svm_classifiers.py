@@ -46,8 +46,15 @@ def train(extract_features, if_grayscale=False):
 
     # Train SVM model with train set
     gamma = SVM_GAMMA_PARAM if SVM_GAMMA_PARAM != 0 else 'auto'
-    model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM, gamma=gamma)
+    model = svm.SVC(max_iter=MAX_ITERATIONS, C=SVM_C_PARAM, gamma=gamma, probability=True)
     model.fit(X_train, y_train)
+    # Return the distance of the sample from all other hyperplane
+    # Higher value of the distance higher confidence
+    confidence_of_model = model.predict_proba(X_train)
+    confidence_average = np.amax(confidence_of_model, axis=1)
+    print(str(confidence_average))
+    #print(str(confidence_of_model))
+
 
     # Test SVM model
     y_train_predict = np.array(model.predict(X_train))
