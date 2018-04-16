@@ -3,6 +3,7 @@ import sys
 import cv2
 import os
 from sklearn import svm, metrics, model_selection
+from scipy import stats
 
 from common import load_images
 from .extract_inception_bottleneck_features import extract_inception_bottleneck_features
@@ -52,7 +53,8 @@ def train(extract_features, if_grayscale=False):
     # Higher value of the distance higher confidence
     confidence_of_model = model.predict_proba(X_train)
     confidence_average = np.amax(confidence_of_model, axis=1)
-    print(str(confidence_average))
+    print(stats.describe(confidence_average))
+    #print(str(confidence_average))
     #print(str(confidence_of_model))
 
 

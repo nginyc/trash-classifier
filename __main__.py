@@ -6,7 +6,7 @@ from svm import train_svm_sift_kmeans, train_svm_orb_kmeans, train_svm_rgb_sift_
 '''
     Usage: . <training_mode>
     training_mode: "svm_inception_bottleneck", "svm_sift_kmeans", "svm_orb_kmeans", 
-        "svm_rgbsift_kmeans"
+        "svm_rgb_sift_kmeans", "svm_rgb_gray_sift_kmeans"
 '''
 if __name__ == '__main__':
     if len(sys.argv) < 2:
