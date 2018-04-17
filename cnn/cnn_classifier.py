@@ -10,11 +10,11 @@ import shutil
 tf.logging.set_verbosity(tf.logging.INFO)
 
 alexnet_params = {
-    'batch_size': 2,
+    'batch_size': 32,
     'learning_rate': 0.002,
-    'train_steps': 10,
-    'eval_steps': 1,
-    'num_classes': 6,
+    'train_steps': 300,
+    'eval_steps': 100,
+    'num_classes': 5,
     'image_height': 256,
     'image_width': 256,
     'image_channels': 3,
@@ -22,26 +22,40 @@ alexnet_params = {
     'save_checkpoints_steps': 100,
     'use_checkpoint': False,
     'log_step_count_steps': 1,
+    'logging_steps': 10,
     'tf_random_seed': 20170409,
     'model_name': 'alexnet_model'
 }
 
-architecture = {
-    'alexnet': alexnet_params
+zfnet_params = {
+    'batch_size': 2,
+    'learning_rate': 0.002,
+    'train_steps': 10,
+    'eval_steps': 11,
+    'num_classes': 5,
+    'image_height': 256,
+    'image_width': 256,
+    'image_channels': 3,
+    'architecture': zfnet_layers_fn,
+    'save_checkpoints_steps': 100,
+    'use_checkpoint': False,
+    'log_step_count_steps': 1,
+    'logging_steps': 10,
+    'tf_random_seed': 20170417,
+    'model_name': 'zfnet_model'
 }
 
-def get_feature_columns(params):
-    feature_columns = {
-        'images': tf.feature_column.numeric_column('images', (params['image_height'], params['image_width'], params['image_channels']))
-    }
-    return feature_columns
+architecture = {
+    'alexnet': alexnet_params,
+    'zfnet': zfnet_params
+}
 
 def model_fn(features, labels, mode, params):                                                                                                                                                                         
     logits = params['architecture'](features, params, mode)
 
     if mode in (tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL):
         global_step = tf.train.get_or_create_global_step()
-        label_indices = tf.argmax(input=logits, axis=1)
+        label_indices = tf.argmax(input=labels, axis=1)
         loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
         tf.summary.scalar('cross_entropy', loss)
 
@@ -61,9 +75,25 @@ def model_fn(features, labels, mode, params):
 
     if mode == tf.estimator.ModeKeys.EVAL:
         eval_metric_ops = {
-            'accuracy': tf.metrics.accuracy(label_indices, predicted_indices)
+            'accuracy': tf.metrics.accuracy(label_indices, predicted_indices),
+            'confusion_matrix': eval_confusion_matrix(label_indices, predicted_indices, params)
         }
         return tf.estimator.EstimatorSpec(mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+def eval_confusion_matrix(labels, predictions, params):
+    with tf.variable_scope("eval_confusion_matrix"):
+        con_matrix = tf.confusion_matrix(labels=labels, predictions=predictions, num_classes=params['num_classes'])
+        con_matrix_sum = tf.Variable(
+            tf.zeros(
+                shape=(params['num_classes'], params['num_classes']), 
+                dtype=tf.int32
+            ),
+            trainable=False,
+            name="confusion_matrix_result",
+            collections=[tf.GraphKeys.LOCAL_VARIABLES]
+        )
+        update_op = tf.assign_add(con_matrix_sum, con_matrix)
+        return tf.convert_to_tensor(con_matrix_sum), update_op
 
 def main(argv):
     try:
@@ -97,14 +127,16 @@ def main(argv):
     estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
     tensors_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
+    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=params['logging_steps'])
 
     train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
     estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
     
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
-    print("Evaluation Results: {}".format(eval_results))
+
+    print("Accuracy: {}".format(eval_results['accuracy']))
+    print("Confusion Matrix: \n{}".format(eval_results['confusion_matrix']))
 
 if __name__ == "__main__":
     tf.app.run()
