@@ -73,7 +73,7 @@ def convert_to_tfrecord(images, labels, save_dir, name):
                 'label': int64_feature(label)
             }))
             writer.write(example.SerializeToString())
-            print("Converted image: {0}/{1}".format(path[0],path[1]))
+            print("Converted image: {0}/{1}".format(path[0], path[1]))
         except IOError as e:
             print("Exception encountered: {0}".format(e))
             continue
@@ -82,12 +82,12 @@ def convert_to_tfrecord(images, labels, save_dir, name):
 def main(argv):
     images, labels = get_images_and_labels(IMAGE_DIRECTORY, CATEGORIES)
     train_images, train_labels, test_images, test_labels = split(images, labels, SPLIT_RATIO)
+    convert_to_tfrecord(train_images, train_labels, TFRECORD_DIRECTORY, TRAIN_FILENAME)
+    convert_to_tfrecord(test_images, test_labels, TFRECORD_DIRECTORY, TEST_FILENAME)
     print("Length train images: {}".format(len(train_images)))
     print("Length train labels: {}".format(len(train_labels)))
     print("Length test images: {}".format(len(test_images)))
     print("Length test labels: {}".format(len(test_labels)))
-    convert_to_tfrecord(train_images, train_labels, TFRECORD_DIRECTORY, TRAIN_FILENAME)
-    convert_to_tfrecord(test_images, test_labels, TFRECORD_DIRECTORY, TEST_FILENAME)
 
 if __name__ == "__main__":
     tf.app.run()
