@@ -27,8 +27,8 @@ from tfrecord_to_dataset import generate_input_fn
 from cnn_architecture import *
 import shutil
 
-# cnn_model = 'alexnet'
-cnn_model = 'zfnet'
+cnn_model = 'alexnet'
+# cnn_model = 'zfnet'
 
 params = architecture[cnn_model]
 
@@ -169,7 +169,7 @@ def _fitness(learning_rate, batch_size, train_steps):
     global best_accuracy
 
     # If the classification accuracy of the saved model is improved ...
-    if accuracy > best_accuracy:
+    if accuracy < best_accuracy:
         # Save the new model
         params['save_checkpoints_steps'] = True
         
@@ -183,7 +183,7 @@ def _fitness(learning_rate, batch_size, train_steps):
     # find a set of hyper-parameters with the LOWEST fitness-value.
     # Because we are interested in the HIGHEST classification
     # accuracy, we need to negate this number so it can be minimized.
-    return -accuracy
+    return accuracy
 
 # test run
 # _fitness(x=default_parameters)
@@ -192,7 +192,7 @@ def _fitness(learning_rate, batch_size, train_steps):
 search_result = gp_minimize(func=_fitness,
                             dimensions=dimensions,
                             acq_func='EI', # Expected Improvement.
-                            n_calls=20,
+                            n_calls=50,
                             x0=default_parameters)
 
 # print results
