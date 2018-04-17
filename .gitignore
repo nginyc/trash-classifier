@@ -1,8 +1,6 @@
 .env/
-.envs/
 .vscode
 __pycache__/
 *.tfrecords
-*.pyc
 /model
 .DS_Store
