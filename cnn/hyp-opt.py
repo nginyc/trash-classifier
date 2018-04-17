@@ -27,9 +27,11 @@ from tfrecord_to_dataset import generate_input_fn
 from cnn_architecture import *
 import shutil
 
-params = alexnet_params
+# cnn_model = 'alexnet'
+cnn_model = 'zfnet'
 
-path_best_model = '19_best_model.keras'
+params = architecture[cnn_model]
+
 best_accuracy = 0.0
 
 # search dimension for learning rate
@@ -149,7 +151,7 @@ def _fitness(learning_rate, batch_size, train_steps):
     logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
 
     train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
-    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
+    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[])
     
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
