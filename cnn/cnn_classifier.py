@@ -13,7 +13,7 @@ alexnet_params = {
     'batch_size': 32,
     'learning_rate': 0.002,
     'train_steps': 300,
-    'eval_steps': 11,
+    'eval_steps': 100,
     'num_classes': 5,
     'image_height': 256,
     'image_width': 256,
@@ -120,22 +120,19 @@ def main(argv):
         log_step_count_steps=params['log_step_count_steps']
     )
     
-    # if not params['use_checkpoint']:
-    #     print("Removing previous artifacts...")
-    #     shutil.rmtree(model_directory, ignore_errors=True)
+    if not params['use_checkpoint']:
+        print("Removing previous artifacts...")
+        shutil.rmtree(model_directory, ignore_errors=True)
 
     estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
 
     tensors_to_log = {"probabilities": "softmax_tensor"}
     logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=params['logging_steps'])
 
-    # train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
-    # estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
+    train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
+    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
     
-    # test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
-    # eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
-
-    test_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
+    test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
 
     print("Accuracy: {}".format(eval_results['accuracy']))

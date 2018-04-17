@@ -17,25 +17,17 @@ CATEGORIES = {
     'plastic': 4
 }
 
-SPLIT_RATIO = 0.3
+SPLIT_RATIO = 0.7
 
 def get_images_and_labels(file_dir, categories):
     images = []
-    subfolders = []
+    labels = []
     for root, sub_folders, files in os.walk(file_dir):
         for name in files:
             category = root.replace("\\", "/").split('/')[-1]
             if "jpg" in name and category in categories:
                 images.append(os.path.join(root, name))
-        for name in sub_folders:
-            if name in categories:
-                subfolders.append(os.path.join(root, name))
-
-    labels = []
-    for subfolder in subfolders:        
-        no_images = len(os.listdir(subfolder))
-        category = subfolder.replace("\\", "/").split('/')[-1]
-        labels = np.append(labels, [categories[category]] * no_images)
+                labels.append(categories[category])
 
     temp = np.array([images, labels])
     temp = temp.transpose()
