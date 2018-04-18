@@ -206,8 +206,11 @@ print("##############################")
 
 # plot convergence
 plot_convergence(search_result)
+plt.show()
 
 # plot dependence
 dim_names = ['learning_rate', 'batch_size', 'train_steps']
 fig, ax = plot_objective(result=search_result, dimension_names=dim_names)
+plt.show()
 fig, ax = plot_evaluations(result=search_result, dimension_names=dim_names)
+plt.show()

@@ -216,7 +216,7 @@ def zfnet_layers_fn(features, params, mode):
     # Logits Layer
     logits = tf.layers.dense(
         inputs=dropout2, 
-        units=6)
+        units=params['num_classes'])
     print("(Zfnet) Logits shape: {}".format(logits.shape))
     
     return logits
