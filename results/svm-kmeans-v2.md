@@ -837,3 +837,61 @@ Test confusion matrix:
  [ 0  1 21  2  1]
  [ 2  1  6 45  0]
  [ 6 14 26  6 43]]
+
+ SVM_C_PARAM=1000 
+KMEANS_BOW_FEATURES_NORMALIZATION=l1 
+KMEANS_CLUSTERS=average_keypoints 
+KMEANS_JOBS=2 
+SVM_GAMMA_PARAM=0.5 
+IMAGE_COUNT_PER_CLASS=400 
+python . svm_sift_kmeans
+Loading image data...
+Splitting dataset to train & test set with test_set_ratio=0.3...
+Extracting features for train & test set...
+Extracting SIFT features...
+Computing KMeans clusters with n_clusters=485...
+L1 normalizing BoW features...
+DescribeResult(nobs=1400, minmax=(0.25930951615299619, 0.99870143885131224), mean=0.53991512673170716, variance=0.027832634951104305, skewness=1.0078105795605872, kurtosis=0.1699703057177544)
+Train accuracy: 0.990714285714
+Train confusion matrix:
+[[278   0   0   0   0]
+ [  0 282   1   0   0]
+ [  0   0 277   0   0]
+ [  1   0   0 268   0]
+ [  5   1   0   5 282]]
+Test accuracy: 0.568333333333
+Test confusion matrix:
+[[73 13  6 25 12]
+ [12 65 24 19 25]
+ [ 7 15 74  7 14]
+ [10  6  7 68  6]
+ [14 18 11  8 61]]
+
+IF_NORMALIZE_IMAGES=True 
+SVM_C_PARAM=4 
+KMEANS_BOW_FEATURES_NORMALIZATION=binary 
+KMEANS_CLUSTERS=sqrt_keypoints 
+KMEANS_JOBS=2 
+IMAGE_COUNT_PER_CLASS=400 python . svm_rgb_gray_sift_kmeans
+Loading image data...
+Splitting dataset to train & test set with test_set_ratio=0.3...
+Extracting features for train & test set...
+Extracting RGB-Gray-SIFT features...
+Computing KMeans clusters with n_clusters=841...
+Converting to binary BoW features...
+DescribeResult(nobs=1400, minmax=(0.26740413767517063, 0.98881311788332082), mean=0.77270414876479943, variance=0.026516751129717162, skewness=-1.1713420141195199, kurtosis=0.5017481081389699)
+Train accuracy: 0.933571428571
+Train confusion matrix:
+[[276  10   3  17  13]
+ [  2 260   9   1   9]
+ [  1   3 261   2   1]
+ [  1   0   1 265   1]
+ [  7   3   2   7 245]]
+Test accuracy: 0.563333333333
+Test confusion matrix:
+[[80 18 11 19 10]
+ [ 7 56 22  6 30]
+ [ 9 17 70  9 16]
+ [ 9 11 10 69 12]
+ [ 8 22 11  5 63]]
+

@@ -52,8 +52,8 @@ def train(extract_features, if_grayscale=False):
     # Return the distance of the sample from all other hyperplane
     # Higher value of the distance higher confidence
     confidence_of_model = model.predict_proba(X_train)
-    confidence_average = np.amax(confidence_of_model, axis=1)
-    print(stats.describe(confidence_average))
+    confidence_example = np.amax(confidence_of_model, axis=1)
+    print(stats.describe(confidence_example))
     #print(str(confidence_average))
     #print(str(confidence_of_model))
 
