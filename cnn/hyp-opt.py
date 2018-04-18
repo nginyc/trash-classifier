@@ -151,7 +151,7 @@ def _fitness(learning_rate, batch_size, train_steps):
     logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
 
     train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
-    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[])
+    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
     
     test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
@@ -171,7 +171,7 @@ def _fitness(learning_rate, batch_size, train_steps):
     # If the classification accuracy of the saved model is improved ...
     if accuracy < best_accuracy:
         # Save the new model
-        params['save_checkpoints_steps'] = True
+        params['use_checkpoint'] = True
         
         # Update the classification accuracy.
         best_accuracy = accuracy
