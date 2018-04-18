@@ -84,7 +84,7 @@ def alexnet_architecture(features, params, mode):
     # Dropout Layer 1
     dropout1 = tf.layers.dropout(
         inputs=dense1, 
-        rate=0.5, 
+        rate=0.2, 
         training=mode == tf.estimator.ModeKeys.TRAIN)
     print("(Alexnet) Dropout1 shape: {}".format(dropout1.shape))
 
@@ -98,7 +98,7 @@ def alexnet_architecture(features, params, mode):
     # Dropout Layer 2
     dropout2 = tf.layers.dropout(
         inputs=dense2, 
-        rate=0.5, 
+        rate=0.2, 
         training=mode == tf.estimator.ModeKeys.TRAIN)
     print("(Alexnet) Dropout2 shape: {}".format(dropout2.shape))
     
@@ -216,7 +216,7 @@ def zfnet_layers_fn(features, params, mode):
     # Logits Layer
     logits = tf.layers.dense(
         inputs=dropout2, 
-        units=6)
+        units=params['num_classes'])
     print("(Zfnet) Logits shape: {}".format(logits.shape))
     
     return logits
