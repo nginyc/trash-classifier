@@ -46,7 +46,7 @@ CLASSES = [
             if if_grayscale, list of numpy ndarrays of shape (image_height, image_width)
         image_labels: list of labels as class indices corresponding to each row of `images`
 '''
-def load_images(if_grayscale=False):
+def load_images(if_grayscale=False, if_normalize_images=IF_NORMALIZE_IMAGES):
     print('Loading image data...')
     images = []
     image_labels = []
@@ -60,7 +60,7 @@ def load_images(if_grayscale=False):
                 image_path,
                 cv2.IMREAD_GRAYSCALE if if_grayscale else cv2.IMREAD_COLOR,
             )
-            if IF_NORMALIZE_IMAGES:
+            if if_normalize_images:
                 image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
 
             images.append(image)

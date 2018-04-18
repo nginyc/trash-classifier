@@ -5,7 +5,7 @@ import cv2
 
 from .compute_kmeans_bow_features import compute_kmeans_bow_features
     
-def extract_sift_features(images_gray_train, images_gray_test):
+def extract_sift_features(images_gray_train, images_gray_test, **kwargs):
     print('Extracting SIFT features...')
     sift = cv2.xfeatures2d.SIFT_create()
     def to_sift_desc(image):
@@ -15,6 +15,6 @@ def extract_sift_features(images_gray_train, images_gray_test):
         return image_sift_desc
     image_sifts_train = [to_sift_desc(image) for image in images_gray_train]
     image_sifts_test = [to_sift_desc(image) for image in images_gray_test]
-    (X_train, X_test) = compute_kmeans_bow_features(image_sifts_train, image_sifts_test)
+    (X_train, X_test) = compute_kmeans_bow_features(image_sifts_train, image_sifts_test, **kwargs)
 
     return (X_train, X_test)
