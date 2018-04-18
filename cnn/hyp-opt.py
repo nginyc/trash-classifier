@@ -41,11 +41,11 @@ dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform',
 
 # search dimension for batch size
 # return int n batch size
-dim_batch_size = Integer(low=1, high=10, name='batch_size')
+dim_batch_size = Integer(low=1, high=100, name='batch_size')
 
 # search dimension for train steps
 # return int n train steps
-dim_train_steps = Integer(low=1, high=20, name='train_steps')
+dim_train_steps = Integer(low=1, high=100, name='train_steps')
 
 # search dimension for activation function
 # return relu or sigmoid
