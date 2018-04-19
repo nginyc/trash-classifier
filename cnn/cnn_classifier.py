@@ -10,9 +10,9 @@ import shutil
 tf.logging.set_verbosity(tf.logging.INFO)
 
 alexnet_params = {
-    'batch_size': 32,
+    'batch_size': 16,
     'learning_rate': 0.002,
-    'train_steps': 300,
+    'train_steps': 400,
     'eval_steps': 10,
     'num_classes': 5,
     'image_height': 256,
@@ -20,7 +20,7 @@ alexnet_params = {
     'image_channels': 3,
     'architecture': alexnet_architecture,
     'save_checkpoints_steps': 100,
-    'use_checkpoint': False,
+    'use_checkpoint': True,
     'log_step_count_steps': 1,
     'logging_steps': 5,
     'tf_random_seed': 20170409,
@@ -28,17 +28,17 @@ alexnet_params = {
 }
 
 zfnet_params = {
-    'batch_size': 2,
+    'batch_size': 16,
     'learning_rate': 0.002,
-    'train_steps': 10,
-    'eval_steps': 11,
+    'train_steps': 400,
+    'eval_steps': 10,
     'num_classes': 5,
     'image_height': 256,
     'image_width': 256,
     'image_channels': 3,
-    'architecture': zfnet_layers_fn,
+    'architecture': zfnet_architecture,
     'save_checkpoints_steps': 100,
-    'use_checkpoint': False,
+    'use_checkpoint': True,
     'log_step_count_steps': 1,
     'logging_steps': 10,
     'tf_random_seed': 20170417,
@@ -51,7 +51,7 @@ architecture = {
 }
 
 def cnn_model_fn(features, labels, mode, params):
-	logits = alexnet_architecture(features, params, mode)
+	logits = params['architecture'](features, params, mode)
 	predictions = {
 		# Generate predictions (for PREDICT and EVAL mode)
 		"classes": tf.argmax(input=logits, axis=1),
@@ -108,19 +108,11 @@ def main(argv):
     model_directory =  os.path.join(current_directory, "..", "model", params['model_name'])
     train_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "train.tfrecords")]
     test_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "test.tfrecords")]
-
-    # run_config = tf.estimator.RunConfig(
-    #     save_checkpoints_steps=params['save_checkpoints_steps'],
-    #     tf_random_seed=params['tf_random_seed'],
-    #     model_dir=model_directory,
-    #     log_step_count_steps=params['log_step_count_steps']
-    # )
     
     if not params['use_checkpoint']:
         print("Removing previous artifacts...")
         shutil.rmtree(model_directory, ignore_errors=True)
 
-    # estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
     estimator = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir=model_directory, params=params)
 
     tensors_to_log = {"probabilities": "softmax_tensor"}

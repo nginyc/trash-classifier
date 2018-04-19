@@ -110,7 +110,7 @@ def alexnet_architecture(features, params, mode):
         
     return logits
 
-def zfnet_layers_fn(features, params, mode): 
+def zfnet_architecture(features, params, mode): 
     inputs = tf.reshape(features['images'], [-1, params['image_height'], params['image_width'], params['image_channels']]) 
     print("(Zfnet) Input shape: {}".format(inputs.shape))
 
