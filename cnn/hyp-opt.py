@@ -168,6 +168,8 @@ def _fitness(learning_rate, batch_size):
     print()
     print("Accuracy: {0:.2%}".format(accuracy))
     print("Confusion Matrix: \n{}".format(eval_results['confusion_matrix']))
+    print("Learning rate: ", learning_rate)
+    print("Batch size: ", batch_size)
     print()
 
     # Save the model if it improves on the best-found performance.
@@ -184,6 +186,9 @@ def _fitness(learning_rate, batch_size):
         best_accuracy = accuracy
         best_learning_rate = learning_rate
         best_batch_size = batch_size
+
+    print("BEST Learning rate: ", best_learning_rate)
+    print("BEST Batch size: ", best_batch_size)
 
     # Delete the Keras model with these hyper-parameters from memory.
     del estimator
