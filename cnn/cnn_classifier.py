@@ -30,7 +30,7 @@ alexnet_params = {
 zfnet_params = {
     'batch_size': 16,
     'learning_rate': 0.002,
-    'train_steps': 400,
+    'train_steps': 1000,
     'eval_steps': 10,
     'num_classes': 5,
     'image_height': 256,
@@ -38,16 +38,35 @@ zfnet_params = {
     'image_channels': 3,
     'architecture': zfnet_architecture,
     'save_checkpoints_steps': 100,
-    'use_checkpoint': True,
+    'use_checkpoint': False,
     'log_step_count_steps': 1,
     'logging_steps': 10,
     'tf_random_seed': 20170417,
     'model_name': 'zfnet_model'
 }
 
+inception_params = {
+    'batch_size': 16,
+    'learning_rate': 0.002,
+    'train_steps': 1000,
+    'eval_steps': 10,
+    'num_classes': 5,
+    'image_height': 299,
+    'image_width': 299,
+    'image_channels': 3,
+    'architecture': inception_architecture,
+    'save_checkpoints_steps': 100,
+    'use_checkpoint': False,
+    'log_step_count_steps': 1,
+    'logging_steps': 10,
+    'tf_random_seed': 20170418,
+    'model_name': 'inception_model'
+}
+
 architecture = {
     'alexnet': alexnet_params,
-    'zfnet': zfnet_params
+    'zfnet': zfnet_params,
+    'inception': inception_params
 }
 
 def cnn_model_fn(features, labels, mode, params):
