@@ -838,7 +838,7 @@ Test confusion matrix:
  [ 2  1  6 45  0]
  [ 6 14 26  6 43]]
 
- SVM_C_PARAM=1000 
+SVM_C_PARAM=1000 
 KMEANS_BOW_FEATURES_NORMALIZATION=l1 
 KMEANS_CLUSTERS=average_keypoints 
 KMEANS_JOBS=2 
@@ -956,8 +956,8 @@ Test confusion matrix:
 SVM_C_PARAM=4 
 KMEANS_BOW_FEATURES_NORMALIZATION=binary 
 KMEANS_CLUSTERS=average_keypoints 
-KMEANS_JOBS=2 I
-MAGE_COUNT_PER_CLASS=400 
+KMEANS_JOBS=2 
+IMAGE_COUNT_PER_CLASS=400 
 python . svm_sift_kmeans
 Loading image data...
 Splitting dataset to train & test set with test_set_ratio=0.3...
@@ -980,3 +980,119 @@ Test confusion matrix:
  [ 8 19 76  8 13]
  [11  8  4 81 10]
  [10 19 16  8 61]]
+
+
+SVM_C_PARAM=1 
+KMEANS_BOW_FEATURES_NORMALIZATION=binary 
+KMEANS_CLUSTERS=average_keypoints 
+KMEANS_JOBS=2 
+IMAGE_COUNT_PER_CLASS=400 
+python . svm_sift_kmeans
+Loading image data...
+Splitting dataset to train & test set with test_set_ratio=0.3...
+Extracting features for train & test set...
+Extracting SIFT features...
+Computing KMeans clusters with n_clusters=472...
+Converting to binary BoW features...
+DescribeResult(nobs=1400, minmax=(0.25405286751896428, 0.96763170165477541), mean=0.5996452045101841, variance=0.027979054052683291, skewness=0.1245238646126458, kurtosis=-1.046742266971236)
+Train accuracy: 0.702142857143
+Train confusion matrix:
+[[250  28  20  66  40]
+ [ 12 213  38  13  49]
+ [ 11  26 188   9  10]
+ [ 16  11  14 161  13]
+ [  8  12  10  11 171]]
+Test accuracy: 0.538333333333
+Test confusion matrix:
+[[75 12  9 35 22]
+ [14 61 28 10 25]
+ [ 5 20 63 12 12]
+ [ 5  4 19 71  5]
+ [ 4 13 11 12 53]]
+
+SVM_C_PARAM=1000 
+IF_NORMALIZE_IMAGES=True 
+KMEANS_CLUSTERS=sqrt_keypoints 
+KMEANS_JOBS=2 
+KMEANS_BOW_FEATURES_NORMALIZATION=l1 
+IMAGE_COUNT_PER_CLASS=400 
+python . svm_rgb_gray_sift_kmeans
+Loading image data...
+Splitting dataset to train & test set with test_set_ratio=0.3...
+Extracting features for train & test set...
+Extracting RGB-Gray-SIFT features...
+Computing KMeans clusters with n_clusters=834...
+L1 normalizing BoW features...
+DescribeResult(nobs=1400, minmax=(0.24156007784547562, 0.99999996230060073), mean=0.65577758240895456, variance=0.04519302041632664, skewness=0.10376775277068029, kurtosis=-1.3061819551698441)
+Train accuracy: 0.736428571429
+Train confusion matrix:
+[[209   4   2  27  10]
+ [ 59 267  82  51  88]
+ [  4   7 183   2   4]
+ [  3   1   5 207   5]
+ [  3   8   3   1 165]]
+Test accuracy: 0.591666666667
+Test confusion matrix:
+[[71  1  2 13 11]
+ [35 92 46 27 42]
+ [ 5 11 70  5  8]
+ [ 9  4  2 65 10]
+ [ 2  5  5  2 57]]
+
+SVM_C_PARAM=1500 
+SVM_GAMMA_PARAM=0.5 
+KMEANS_CLUSTERS=sqrt_keypoints 
+KMEANS_JOBS=4 
+KMEANS_BOW_FEATURES_NORMALIZATION=l1 
+IMAGE_COUNT_PER_CLASS=400 
+python . svm_sift_kmeans
+Loading image data...
+Splitting dataset to train & test set with test_set_ratio=0.3...
+Extracting features for train & test set...
+Extracting SIFT features...
+Computing KMeans clusters with n_clusters=831...
+L1 normalizing BoW features...
+DescribeResult(nobs=1400, minmax=(0.27963990963860746, 0.9966370944742583), mean=0.57788656461224042, variance=0.021361074655666466, skewness=0.8496573111878325, kurtosis=-0.015913216411859832)
+Train accuracy: 0.997142857143
+Train confusion matrix:
+[[286   0   0   0   0]
+ [  0 276   1   0   0]
+ [  0   0 273   0   0]
+ [  0   0   0 276   0]
+ [  2   1   0   0 285]]
+Test accuracy: 0.531666666667
+Test confusion matrix:
+[[68 12 10 25 12]
+ [11 52 26 13 23]
+ [13 28 77 14 17]
+ [11  7  2 67  8]
+ [ 9 24 11  5 55]]
+
+SVM_C_PARAM=1000
+SVM_GAMMA_PARAM=0.5
+KMEANS_BOW_FEATURES_NORMALIZATION=l1
+KMEANS_CLUSTERS=sqrt_keypoints
+KMEANS_JOBS=2
+IMAGE_COUNT_PER_CLASS=400
+python . svm_sift_kmeans
+Loading image data...
+Splitting dataset to train & test set with test_set_ratio=0.3...
+Extracting features for train & test set...
+Extracting SIFT features...
+Computing KMeans clusters with n_clusters=822...
+L1 normalizing BoW features...
+DescribeResult(nobs=1400, minmax=(0.29561439202474732, 0.9945528778580508), mean=0.58602761104296175, variance=0.020524884953576246, skewness=0.8031675778075706, kurtosis=-0.13170298071266817)
+Train accuracy: 0.995714285714
+Train confusion matrix:
+[[270   0   0   0   0]
+ [  0 287   0   0   0]
+ [  0   0 293   0   0]
+ [  0   0   0 259   0]
+ [  3   0   0   3 285]]
+Test accuracy: 0.556666666667
+Test confusion matrix:
+[[65  8 11 17  7]
+ [21 59 10 13 29]
+ [10 19 65 10 19]
+ [16  8  6 89  4]
+ [15 19 15  9 56]]
