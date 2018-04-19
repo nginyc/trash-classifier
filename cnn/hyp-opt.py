@@ -23,7 +23,7 @@ from skopt.utils import use_named_args
 
 from cnn_classifier import *
 import os
-from tfrecord_to_dataset import generate_input_fn
+from tfrecord_to_dataset import input_fn
 from cnn_architecture import *
 import shutil
 
@@ -45,29 +45,36 @@ dim_batch_size = Integer(low=1, high=100, name='batch_size')
 
 # search dimension for train steps
 # return int n train steps
-dim_train_steps = Integer(low=1, high=100, name='train_steps')
+# dim_train_steps = Integer(low=1, high=100, name='train_steps')
 
 # search dimension for activation function
 # return relu or sigmoid
 # dim_activation = Categorical(categories=['relu', 'sigmoid'],
 #                              name='activation')
 
-dimensions = [dim_learning_rate, dim_batch_size, dim_train_steps]
+# dimensions = [dim_learning_rate, dim_batch_size, dim_train_steps]
+dimensions = [dim_learning_rate, dim_batch_size]
 
-default_parameters = [0.002, 2, 10]
+
+# default_parameters = [0.002, 2, 10]
+default_parameters = [0.002, 2]
+
 
 # logger for training progress
-def log_dir_name(learning_rate, batch_size, train_steps):
+# def log_dir_name(learning_rate, batch_size, train_steps):
+def log_dir_name(learning_rate, batch_size):
 # , num_dense_layers,
 #                  num_dense_nodes, activation):
 
     # The dir-name for the TensorBoard log-dir.
-    s = "./19_logs/lr_{0:.0e}_batch_{1}_steps_{2}/"
+    s = "./19_logs/lr_{0:.0e}_batch_{1}/"
 
     # Insert all the hyper-parameters in the dir-name.
+    # log_dir = s.format(learning_rate,
+    #                     batch_size,
+    #                     train_steps)
     log_dir = s.format(learning_rate,
-                        batch_size,
-                        train_steps)
+                        batch_size)
 
     return log_dir
 
@@ -122,38 +129,35 @@ def plot_example_errors(cls_pred):
                 cls_pred=cls_pred[0:9])
 
 @use_named_args(dimensions=dimensions)
-def _fitness(learning_rate, batch_size, train_steps):
+# def _fitness(learning_rate, batch_size, train_steps):
+def _fitness(learning_rate, batch_size):
     params['learning_rate'] = learning_rate
     params['batch_size'] = batch_size
-    params['train_steps'] = train_steps
+    params['train_steps'] = 100
+
+    print("Learning rate", learning_rate)
+    print("Batch size", batch_size)
 
     # from main in cnn_classifier
     current_directory = os.path.dirname(os.path.abspath(__file__))
     model_directory =  os.path.join(current_directory, "..", "model", params['model_name'])
     train_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "train.tfrecords")]
     test_data_files = [os.path.join(current_directory, "..", "data", "tfrecords", "test.tfrecords")]
-
-    run_config = tf.estimator.RunConfig(
-        save_checkpoints_steps=params['save_checkpoints_steps'],
-        tf_random_seed=params['tf_random_seed'],
-        model_dir=model_directory,
-        log_step_count_steps=params['log_step_count_steps']
-    )
     
-    # checkpoint false means delete the existing
     if not params['use_checkpoint']:
         print("Removing previous artifacts...")
         shutil.rmtree(model_directory, ignore_errors=True)
 
-    estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
+    # estimator = tf.estimator.Estimator(model_fn=model_fn, config=run_config, params=params)
+    estimator = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir=model_directory, params=params)
 
     tensors_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
+    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=params['logging_steps'])
 
-    train_input_fn = generate_input_fn(train_data_files, params, mode=tf.estimator.ModeKeys.TRAIN)
-    estimator.train(train_input_fn, max_steps=params['train_steps'], hooks=[logging_hook])
+    train_input_fn = lambda: input_fn(train_data_files, params)
+    estimator.train(train_input_fn, steps=params['train_steps'], hooks=[logging_hook])
     
-    test_input_fn = generate_input_fn(test_data_files, params, mode=tf.estimator.ModeKeys.EVAL)
+    test_input_fn = lambda: input_fn(test_data_files, params)
     eval_results = estimator.evaluate(test_input_fn, steps=params['eval_steps'], hooks=[logging_hook])
 
     accuracy = -eval_results['accuracy']
@@ -161,6 +165,7 @@ def _fitness(learning_rate, batch_size, train_steps):
     # Print the classification accuracy.
     print()
     print("Accuracy: {0:.2%}".format(accuracy))
+    print("Confusion Matrix: \n{}".format(eval_results['confusion_matrix']))
     print()
 
     # Save the model if it improves on the best-found performance.
@@ -209,7 +214,8 @@ plot_convergence(search_result)
 plt.show()
 
 # plot dependence
-dim_names = ['learning_rate', 'batch_size', 'train_steps']
+# dim_names = ['learning_rate', 'batch_size', 'train_steps']
+dim_names = ['learning_rate', 'batch_size']
 fig, ax = plot_objective(result=search_result, dimension_names=dim_names)
 plt.show()
 fig, ax = plot_evaluations(result=search_result, dimension_names=dim_names)
