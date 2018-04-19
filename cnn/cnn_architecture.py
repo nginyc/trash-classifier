@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow_hub as hub
 
 def alexnet_architecture(features, params, mode):
     inputs = tf.reshape(features['images'], [-1, params['image_height'], params['image_width'], params['image_channels']])  
@@ -110,7 +111,7 @@ def alexnet_architecture(features, params, mode):
         
     return logits
 
-def zfnet_layers_fn(features, params, mode): 
+def zfnet_architecture(features, params, mode): 
     inputs = tf.reshape(features['images'], [-1, params['image_height'], params['image_width'], params['image_channels']]) 
     print("(Zfnet) Input shape: {}".format(inputs.shape))
 
@@ -220,3 +221,19 @@ def zfnet_layers_fn(features, params, mode):
     print("(Zfnet) Logits shape: {}".format(logits.shape))
     
     return logits
+
+def inception_architecture(features, params, mode): 
+    inputs = tf.reshape(features['images'], [-1, params['image_height'], params['image_width'], params['image_channels']]) 
+    print("(Inception) Input shape: {}".format(inputs.shape))
+
+    module = hub.Module("https://tfhub.dev/google/imagenet/inception_v3/feature_vector/1")
+    outputs = module(inputs)
+    print("(Inception) Output shape: {}".format(outputs.shape))
+
+    # Logits Layer
+    logits = tf.layers.dense(
+        inputs=outputs, 
+        units=params['num_classes'])
+    print("(Inception) Logits shape: {}".format(logits.shape))
+
+    return
