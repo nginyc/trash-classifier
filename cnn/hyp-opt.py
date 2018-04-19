@@ -27,12 +27,14 @@ from tfrecord_to_dataset import input_fn
 from cnn_architecture import *
 import shutil
 
-cnn_model = 'alexnet'
-# cnn_model = 'zfnet'
+# cnn_model = 'alexnet'
+cnn_model = 'zfnet'
 
 params = architecture[cnn_model]
 
 best_accuracy = 0.0
+best_learning_rate = 0.0
+best_batch_size = 0.0
 
 # search dimension for learning rate
 # return int k for 1ek
@@ -180,6 +182,8 @@ def _fitness(learning_rate, batch_size):
         
         # Update the classification accuracy.
         best_accuracy = accuracy
+        best_learning_rate = learning_rate
+        best_batch_size = batch_size
 
     # Delete the Keras model with these hyper-parameters from memory.
     del estimator
