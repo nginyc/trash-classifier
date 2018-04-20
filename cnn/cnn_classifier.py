@@ -20,7 +20,7 @@ alexnet_params = {
     'image_channels': 3,
     'architecture': alexnet_architecture,
     'save_checkpoints_steps': 100,
-    'use_checkpoint': True,
+    'use_checkpoint': False,
     'log_step_count_steps': 1,
     'logging_steps': 5,
     'tf_random_seed': 20170409,
