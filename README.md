@@ -213,3 +213,23 @@ out_width  = ceil(float(in_width - filter_width + 1) / float(strides[2]))
     Filter Shape: `[3, 3]`  
     Strides Shape: `[2, 2]`  
     Output Shape (Valid Padding): `[-1, 63, 63, 96]`
+
+
+# List of Tools & Resources 
+- https://github.com/garythung/trashnet 
+- https://adeshpande3.github.io/The-9-Deep-Learning-Papers-You-Need-To-Know-About.html 
+- https://smist08.wordpress.com/tag/adam-optimizer/
+- https://stackoverflow.com/questions/36162180/gradient-descent-vs-adagrad-vs-momentum-in-tensorflow utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+- https://www.kaggle.com/grfiv4/plot-a-confusion-matrix
+- https://medium.com/@utsumukiMutsuki/using-inception-v3-from-tensorflow-hub-for-transfer-learning-a931ff884526
+- https://arxiv.org/pdf/1707.07013.pdf
+- https://machinelearningmastery.com/report-classifier-performance-confidence-intervals/
+- https://arxiv.org/pdf/1505.05424.pdf
+- https://scikit-optimize.github.io/#skopt.gp_minimize
+- http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+- http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+- https://code.oursky.com/tensorflow-svm-image-classifications-engine/
+- https://github.com/GoogleCloudPlatform/tf-estimator-tutorials/blob/master/07%20-%20%20Image%20Analysis/02.0%20-%20CNN%20with%20CIFAR-10%20tfrecords%20dataset.ipynb
+- https://docs.opencv.org/3.3.0/da/df5/tutorial_py_sift_intro.html
+- https://docs.opencv.org/3.0-beta/modules/features2d/doc/feature_detection_and_description.html#orb-operator
+- https://github.com/Fdevmsy/Image_Classification_with_5_methods
