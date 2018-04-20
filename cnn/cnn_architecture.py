@@ -230,10 +230,38 @@ def inception_architecture(features, params, mode):
     outputs = module(inputs)
     print("(Inception) Output shape: {}".format(outputs.shape))
 
+    # Dense Layer 1
+    dense1 = tf.layers.dense(
+        inputs=outputs, 
+        units=2048, 
+        activation=tf.nn.relu)
+    print("(Inception) Dense1 shape: {}".format(dense1.shape))
+
+    # Dropout Layer 1
+    dropout1 = tf.layers.dropout(
+        inputs=dense1, 
+        rate=0.2, 
+        training=mode == tf.estimator.ModeKeys.TRAIN)
+    print("(Inception) Dropout1 shape: {}".format(dropout1.shape))
+
+    # Dense Layer 2
+    dense2 = tf.layers.dense(
+        inputs=dropout1, 
+        units=2048, 
+        activation=tf.nn.relu)
+    print("(Inception) Dense2 shape: {}".format(dense2.shape))
+
+    # Dropout Layer 2
+    dropout2 = tf.layers.dropout(
+        inputs=dense2, 
+        rate=0.2, 
+        training=mode == tf.estimator.ModeKeys.TRAIN)
+    print("(Inception) Dropout2 shape: {}".format(dropout2.shape))
+
     # Logits Layer
     logits = tf.layers.dense(
-        inputs=outputs, 
+        inputs=dropout2, 
         units=params['num_classes'])
     print("(Inception) Logits shape: {}".format(logits.shape))
 
-    return
+    return logits

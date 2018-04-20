@@ -25,14 +25,15 @@ def parse_record(serialized_example, params):
 
 	return image, label
 
-def input_fn(file_names, params):
+def input_fn(file_names, params, mode):
 	dataset = tf.data.TFRecordDataset(filenames=file_names)
 	dataset = dataset.map(lambda value: parse_record(value, params))
 	dataset = dataset.map(lambda image, label: (preprocess_image(image, params), label))
 
-	buffer_size = params['batch_size'] * 2 + 1
+	batch_size = params['batch_size'] if mode == tf.estimator.ModeKeys.TRAIN else params['eval_batch_size']
+	buffer_size = batch_size * 2 + 1
 	dataset = dataset.shuffle(buffer_size=buffer_size)
-	dataset = dataset.batch(params['batch_size'])
+	dataset = dataset.batch(batch_size)
 	dataset = dataset.repeat(None)
 	iterator = dataset.make_one_shot_iterator()
 	images, labels = iterator.get_next()
