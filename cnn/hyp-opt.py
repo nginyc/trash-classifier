@@ -27,8 +27,8 @@ from tfrecord_to_dataset import input_fn
 from cnn_architecture import *
 import shutil
 
-# cnn_model = 'alexnet'
-cnn_model = 'zfnet'
+cnn_model = 'alexnet'
+# cnn_model = 'zfnet'
 
 params = architecture[cnn_model]
 
@@ -135,7 +135,7 @@ def plot_example_errors(cls_pred):
 def _fitness(learning_rate, batch_size):
     params['learning_rate'] = learning_rate
     params['batch_size'] = batch_size
-    params['train_steps'] = 100
+    params['train_steps'] = 500
 
     print("Learning rate", learning_rate)
     print("Batch size", batch_size)
@@ -176,17 +176,20 @@ def _fitness(learning_rate, batch_size):
     # We use the global keyword so we update the variable outside
     # of this function.
     global best_accuracy
+    global best_learning_rate
+    global best_batch_size
 
     # If the classification accuracy of the saved model is improved ...
     if accuracy < best_accuracy:
         # Save the new model
-        params['use_checkpoint'] = True
+        # params['use_checkpoint'] = True
         
         # Update the classification accuracy.
         best_accuracy = accuracy
         best_learning_rate = learning_rate
         best_batch_size = batch_size
 
+    print("BEST Accuracy: ", best_accuracy)
     print("BEST Learning rate: ", best_learning_rate)
     print("BEST Batch size: ", best_batch_size)
 
