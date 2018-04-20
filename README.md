@@ -219,7 +219,7 @@ out_width  = ceil(float(in_width - filter_width + 1) / float(strides[2]))
 - https://github.com/garythung/trashnet 
 - https://adeshpande3.github.io/The-9-Deep-Learning-Papers-You-Need-To-Know-About.html 
 - https://smist08.wordpress.com/tag/adam-optimizer/
-- https://stackoverflow.com/questions/36162180/gradient-descent-vs-adagrad-vs-momentum-in-tensorflow utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+- https://stackoverflow.com/questions/36162180/gradient-descent-vs-adagrad-vs-momentum-in-tensorflow?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 - https://www.kaggle.com/grfiv4/plot-a-confusion-matrix
 - https://medium.com/@utsumukiMutsuki/using-inception-v3-from-tensorflow-hub-for-transfer-learning-a931ff884526
 - https://arxiv.org/pdf/1707.07013.pdf
