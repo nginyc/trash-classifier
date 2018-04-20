@@ -14,27 +14,20 @@ CATEGORIES = {
     'glass': 1,
     'metal': 2,
     'paper': 3,
-    'plastic': 4,
-    'trash': 5 
+    'plastic': 4
 }
 
-SPLIT_RATIO = 0.8
+SPLIT_RATIO = 0.7
 
 def get_images_and_labels(file_dir, categories):
     images = []
-    subfolders = []
+    labels = []
     for root, sub_folders, files in os.walk(file_dir):
         for name in files:
-            if "jpg" in name:
+            category = root.replace("\\", "/").split('/')[-1]
+            if "jpg" in name and category in categories:
                 images.append(os.path.join(root, name))
-        for name in sub_folders:
-            subfolders.append(os.path.join(root, name))
-
-    labels = []
-    for subfolder in subfolders:        
-        no_images = len(os.listdir(subfolder))
-        category = subfolder.replace("\\", "/").split('/')[-1] # todo
-        labels = np.append(labels, [categories[category]] * no_images)
+                labels.append(categories[category])
 
     temp = np.array([images, labels])
     temp = temp.transpose()
@@ -43,6 +36,9 @@ def get_images_and_labels(file_dir, categories):
     image_list = list(temp[:, 0])
     label_list = list(temp[:, 1])
     label_list = [int(float(i)) for i in label_list]
+
+    for i, l in zip(image_list, label_list):
+        print("Filename: {0}, Label: {1}".format(i.replace("\\", "/").split('/')[-1], l))
 
     return image_list, label_list
 
@@ -77,7 +73,7 @@ def convert_to_tfrecord(images, labels, save_dir, name):
                 'label': int64_feature(label)
             }))
             writer.write(example.SerializeToString())
-            print("Converted image: {0}/{1}".format(path[0],path[1]))
+            print("Converted image: {0}/{1}".format(path[0], path[1]))
         except IOError as e:
             print("Exception encountered: {0}".format(e))
             continue
@@ -88,6 +84,10 @@ def main(argv):
     train_images, train_labels, test_images, test_labels = split(images, labels, SPLIT_RATIO)
     convert_to_tfrecord(train_images, train_labels, TFRECORD_DIRECTORY, TRAIN_FILENAME)
     convert_to_tfrecord(test_images, test_labels, TFRECORD_DIRECTORY, TEST_FILENAME)
+    print("Length train images: {}".format(len(train_images)))
+    print("Length train labels: {}".format(len(train_labels)))
+    print("Length test images: {}".format(len(test_images)))
+    print("Length test labels: {}".format(len(test_labels)))
 
 if __name__ == "__main__":
     tf.app.run()
