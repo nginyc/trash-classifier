@@ -31,7 +31,7 @@ alexnet_params = {
 zfnet_params = {
 	'batch_size': 35,
 	'learning_rate': 0.00198716,
-	'train_steps': 1000,
+	'train_steps': 100,
 	'eval_steps': 1,
 	'eval_batch_size': 717,
 	'num_classes': 5,
@@ -39,7 +39,7 @@ zfnet_params = {
 	'image_width': 256,
 	'image_channels': 3,
 	'architecture': zfnet_architecture,
-	'save_checkpoints_steps': 100,
+	'save_checkpoints_steps': 10,
 	'use_checkpoint': False,
 	'log_step_count_steps': 1,
 	'logging_steps': 10,
@@ -87,10 +87,10 @@ def cnn_model_fn(features, labels, mode, params):
 	loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
 
 	if mode == tf.estimator.ModeKeys.TRAIN:
-		# optimizer = tf.train.GradientDescentOptimizer(learning_rate=params['learning_rate'])
+		optimizer = tf.train.GradientDescentOptimizer(learning_rate=params['learning_rate'])
+		# optimizer = tf.train.MomentumOptimizer(learning_rate=params['learning_rate'], momentum=0.001)
 		# optimizer = tf.train.AdadeltaOptimizer(learning_rate=params['learning_rate'])
 		# optimizer = tf.train.AdamOptimizer(learning_rate=params['learning_rate'], epsilon=0.1)
-		optimizer = tf.train.MomentumOptimizer(learning_rate=params['learning_rate'], momentum=0.001)
 		train_op = optimizer.minimize(
 			loss=loss,
 			global_step=tf.train.get_global_step())
