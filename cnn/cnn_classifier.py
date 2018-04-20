@@ -10,7 +10,6 @@ import shutil
 tf.logging.set_verbosity(tf.logging.INFO)
 
 alexnet_params = {
-<<<<<<< HEAD
 	'batch_size': 16,
 	'learning_rate': 0.002,
 	'train_steps': 1000,
@@ -27,23 +26,6 @@ alexnet_params = {
 	'logging_steps': 5,
 	'tf_random_seed': 20170409,
 	'model_name': 'alexnet_model'
-=======
-    'batch_size': 16,
-    'learning_rate': 0.002,
-    'train_steps': 400,
-    'eval_steps': 10,
-    'num_classes': 5,
-    'image_height': 256,
-    'image_width': 256,
-    'image_channels': 3,
-    'architecture': alexnet_architecture,
-    'save_checkpoints_steps': 100,
-    'use_checkpoint': False,
-    'log_step_count_steps': 1,
-    'logging_steps': 5,
-    'tf_random_seed': 20170409,
-    'model_name': 'alexnet_model'
->>>>>>> master
 }
 
 zfnet_params = {
@@ -91,7 +73,6 @@ architecture = {
 }
 
 def cnn_model_fn(features, labels, mode, params):
-<<<<<<< HEAD
 	logits = params['architecture'](features, params, mode)
 	predictions = {
 		# Generate predictions (for PREDICT and EVAL mode)
@@ -119,32 +100,6 @@ def cnn_model_fn(features, labels, mode, params):
 		"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"]),
 		"confusion_matrix": eval_confusion_matrix(labels, predictions["classes"], params)}
 	return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
-=======
-    logits = params['architecture'](features, params, mode)
-    predictions = {
-        # Generate predictions (for PREDICT and EVAL mode)
-        "classes": tf.argmax(input=logits, axis=1),
-        # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-        # `logging_hook`.
-        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
-    }
-    if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=params['learning_rate'])
-        train_op = optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step())
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"]),
-        "confusion_matrix": eval_confusion_matrix(labels, predictions["classes"], params)}
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
->>>>>>> master
 
 def eval_confusion_matrix(labels, predictions, params):
 	with tf.variable_scope("eval_confusion_matrix"):
@@ -198,8 +153,4 @@ def main(argv):
 	print("Confusion Matrix: \n{}".format(eval_results['confusion_matrix']))
 
 if __name__ == "__main__":
-<<<<<<< HEAD
 	tf.app.run()
-=======
-    tf.app.run()
->>>>>>> master
