@@ -28,10 +28,26 @@ git push
 python3 ./cnn/image_to_tfrecord.py
 ```
 
-## Running SVM Classifier
+## Running SVM Classifiers
 
 ```bash
-python3 ./svm/svm_classifier.py
+python3 . svm_inception_bottleneck
+```
+
+```bash
+python3 . svm_sift_kmeans
+```
+
+```bash
+python3 . svm_orb_kmeans
+```
+
+```bash
+python3 . svm_rgb_sift_kmeans
+```
+
+```bash
+python3 . svm_rgb_gray_sift_kmeans
 ```
 
 ## Running CNN Classifier
